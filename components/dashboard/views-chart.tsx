@@ -25,7 +25,7 @@ export default function ViewsChart({ data }: { data: DayData[] }) {
               style={{ height: "100%" }}
             >
               <div
-                className="w-full rounded-t-sm bg-emerald-500/60 transition-colors group-hover:bg-emerald-400"
+                className="w-full rounded-t-sm bg-pink-500/60 transition-colors group-hover:bg-pink-400"
                 style={{ height: `${Math.max(height, 2)}%` }}
               />
               <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-zinc-800 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">

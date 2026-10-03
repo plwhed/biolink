@@ -1,14 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
 
 type Mode = "login" | "register";
-
-const inputClasses =
-  "w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/40 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/15";
-
-const labelClasses = "mb-1.5 block text-sm font-medium text-white/80";
 
 export default function AuthCard({
   initialMode,
@@ -17,6 +13,7 @@ export default function AuthCard({
   initialMode: Mode;
   initialUsername?: string;
 }) {
+  const reduce = useReducedMotion();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [username, setUsername] = useState(initialUsername);
   const [email, setEmail] = useState("");
@@ -25,11 +22,16 @@ export default function AuthCard({
   const [tos, setTos] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   function switchMode(next: Mode) {
     if (next === mode) return;
     setMode(next);
     setError("");
+    setTos(false);
+    setConfirm("");
+    setEmail("");
+    setPassword("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -101,82 +103,99 @@ export default function AuthCard({
 
   const isRegister = mode === "register";
 
+  const inputBase = "w-full rounded-xl border bg-black/40 px-4 py-3 text-base text-white outline-none transition placeholder:text-white/30 disabled:opacity-50 disabled:cursor-not-allowed";
+  const labelBase = "mb-2 block text-sm font-medium text-white/80";
+
   return (
     <>
-      <div className="relative grid w-full grid-cols-2 rounded-full bg-white/10 p-1 ring-1 ring-white/10">
-        <span
-          className={`absolute bottom-1 left-1 top-1 w-[calc(50%-0.25rem)] rounded-full bg-emerald-400/90 shadow-lg shadow-emerald-900/30 transition-transform duration-300 ease-out ${
-            isRegister ? "translate-x-full" : ""
-          }`}
-        />
-        <button
-          type="button"
-          onClick={() => switchMode("login")}
-          className={`relative z-10 rounded-full py-2 text-sm font-medium transition-colors ${
-            mode === "login"
-              ? "text-emerald-950"
-              : "text-white/70 hover:text-white"
-          }`}
-        >
-          Log in
-        </button>
-        <button
-          type="button"
-          onClick={() => switchMode("register")}
-          className={`relative z-10 rounded-full py-2 text-sm font-medium transition-colors ${
-            isRegister
-              ? "text-emerald-950"
-              : "text-white/70 hover:text-white"
-          }`}
-        >
-          Sign up
-        </button>
+      {/* Mode Switcher - Pill Style */}
+      <div className="relative w-full max-w-xs mx-auto mb-8" role="tablist" aria-label="Auth mode">
+        <div className="flex gap-1 bg-white/5 rounded-full p-1 ring-1 ring-white/10">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "login"}
+            onClick={() => switchMode("login")}
+            className={`relative z-10 flex-1 rounded-full py-2.5 text-sm font-medium transition-colors ${
+              mode === "login"
+                ? "bg-pink-400 text-pink-950 shadow-sm"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            Log in
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "register"}
+            onClick={() => switchMode("register")}
+            className={`relative z-10 flex-1 rounded-full py-2.5 text-sm font-medium transition-colors ${
+              isRegister
+                ? "bg-pink-400 text-pink-950 shadow-sm"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            Sign up
+          </button>
+        </div>
       </div>
 
-      <div key={mode} className="animate-fade-slide-in mt-6">
-        <h1 className="text-center text-2xl font-semibold leading-tight tracking-tight text-white">
-          {isRegister ? "Create your page" : "Welcome back"}
-        </h1>
-        <p className="mt-1.5 text-center text-sm text-white/60">
-          {isRegister
-            ? "It only takes a few seconds — no card needed."
-            : "Log in to manage your links."}
-        </p>
+      <motion.div
+        key={mode}
+        initial={reduce ? {} : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-semibold leading-tight tracking-tight text-white">
+            {isRegister ? "Create your page" : "Welcome back"}
+          </h1>
+          <p className="mt-2 text-center text-sm text-white/50">
+            {isRegister
+              ? "It only takes a few seconds — no card needed."
+              : "Log in to manage your links."}
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor={`${mode}-username`} className={labelClasses}>
+            <label htmlFor={`${mode}-username`} className="mb-2 block text-sm font-medium text-white/80">
               Username
             </label>
-            <input
-              id={`${mode}-username`}
-              value={username}
-              onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
-              placeholder="@yourusername"
-              autoComplete="username"
-              className={inputClasses}
-            />
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-400/70" aria-hidden="true">@</span>
+              <input
+                id={`${mode}-username`}
+                value={username}
+                onChange={(e) => setUsername(e.target.value.replace(/\s/g, "").toLowerCase())}
+                placeholder="yourusername"
+                autoComplete="username"
+                className={`${inputBase} pl-9 border-white/10 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15`}
+                disabled={loading}
+              />
+            </div>
           </div>
 
           {isRegister && (
             <div>
-              <label htmlFor="register-email" className={labelClasses}>
+              <label htmlFor="register-email" className="mb-2 block text-sm font-medium text-white/80">
                 Email
               </label>
               <input
                 id="register-email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value.toLowerCase())}
                 placeholder="you@example.com"
                 autoComplete="email"
-                className={inputClasses}
+                className={`${inputBase} border-white/10 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15`}
+                disabled={loading}
               />
             </div>
           )}
 
           <div>
-            <label htmlFor={`${mode}-password`} className={labelClasses}>
+            <label htmlFor={`${mode}-password`} className="mb-2 block text-sm font-medium text-white/80">
               Password
             </label>
             <input
@@ -186,13 +205,14 @@ export default function AuthCard({
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               autoComplete={isRegister ? "new-password" : "current-password"}
-              className={inputClasses}
+              className={`${inputBase} border-white/10 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15`}
+              disabled={loading}
             />
           </div>
 
           {isRegister && (
             <div>
-              <label htmlFor="register-confirm" className={labelClasses}>
+              <label htmlFor="register-confirm" className="mb-2 block text-sm font-medium text-white/80">
                 Confirm password
               </label>
               <input
@@ -202,41 +222,42 @@ export default function AuthCard({
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="••••••••"
                 autoComplete="new-password"
-                className={inputClasses}
+                className={`${inputBase} border-white/10 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15`}
+                disabled={loading}
               />
             </div>
           )}
 
           {isRegister && (
-            <div className="flex items-center gap-3 select-none">
+            <div className="flex items-start gap-3">
               <button
                 type="button"
                 role="checkbox"
                 aria-checked={tos}
                 onClick={() => setTos(!tos)}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all ${
+                className={`flex h-5 w-5 shrink-0 mt-0.5 items-center justify-center rounded-md border transition-all ${
                   tos
-                    ? "border-emerald-400 bg-emerald-400"
-                    : "border-white/20 bg-white/5"
+                    ? "border-pink-400 bg-pink-400"
+                    : "border-white/15 bg-white/5 hover:border-white/30"
                 }`}
               >
                 <svg
-                  className={`h-3 w-3 text-emerald-950 transition-opacity ${tos ? "opacity-100" : "opacity-0"}`}
+                  className={`h-3 w-3 text-pink-950 transition-opacity ${tos ? "opacity-100" : "opacity-0"}`}
                   viewBox="0 0 12 12"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth={2.5}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <path d="M2 6l3 3 5-5" />
                 </svg>
               </button>
-              <span className="text-sm text-white/60">
+              <span className="text-sm text-white/60 leading-relaxed">
                 I agree to the{" "}
                 <Link
                   href="/terms"
-                  className="font-medium text-emerald-400 underline underline-offset-2 hover:text-emerald-300"
+                  className="font-medium text-pink-400 underline underline-offset-2 hover:text-pink-300"
                 >
                   Terms of Service
                 </Link>
@@ -245,21 +266,41 @@ export default function AuthCard({
             </div>
           )}
 
-          {error && <p className="text-sm font-medium text-red-400">{error}</p>}
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm font-medium text-red-400"
+            >
+              {error}
+            </motion.p>
+          )}
 
-          <button
+          <motion.button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-emerald-400 py-3 text-sm font-semibold text-emerald-950 shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-300 active:scale-[0.99] disabled:opacity-50"
+            whileTap={{ scale: 0.98 }}
+            className="w-full rounded-full bg-pink-400 py-3.5 text-base font-semibold text-pink-950 shadow-lg shadow-pink-500/25 transition hover:bg-pink-300 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
               ? "Please wait…"
               : isRegister
-                ? "Create account"
-                : "Log in"}
-          </button>
+              ? "Create account"
+              : "Log in"}
+          </motion.button>
         </form>
-      </div>
+
+        <p className="mt-6 text-center text-sm text-white/50">
+          {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
+          <button
+            type="button"
+            onClick={() => switchMode(isRegister ? "login" : "register")}
+            className="font-medium text-pink-400 hover:text-pink-300 underline underline-offset-2"
+          >
+            {isRegister ? "Log in" : "Sign up"}
+          </button>
+        </p>
+      </motion.div>
     </>
   );
 }

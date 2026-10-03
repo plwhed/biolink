@@ -69,7 +69,7 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="mt-1 text-sm text-white/50">
             Welcome back,{" "}
-            <span className="text-emerald-400">{session.username}</span>.
+            <span className="text-pink-400">{session.username}</span>.
           </p>
 
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">

@@ -154,7 +154,7 @@ export default function LinksTab({
                 </svg>
                 {p && <svg className="h-4 w-4 shrink-0 fill-current text-white/60" viewBox="0 0 24 24"><path d={p.icon} /></svg>}
                 <span className="flex-1 truncate text-sm text-white/70">{link.url}</span>
-                <button onClick={() => openAddModal(p ?? platforms[0])} className="text-xs text-white/30 hover:text-emerald-400">Edit</button>
+                <button onClick={() => openAddModal(p ?? platforms[0])} className="text-xs text-white/30 hover:text-pink-400">Edit</button>
                 <button onClick={() => removeLink(index)} className="text-xs text-white/30 hover:text-red-400">Remove</button>
               </div>
             );
@@ -164,7 +164,7 @@ export default function LinksTab({
 
       <button
         onClick={() => setShowPlatformModal(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/10 py-3 text-sm font-medium text-white/40 transition hover:border-emerald-400/30 hover:text-emerald-400"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/10 py-3 text-sm font-medium text-white/40 transition hover:border-pink-400/30 hover:text-pink-400"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path d="M12 4v16m8-8H4" />
@@ -175,7 +175,7 @@ export default function LinksTab({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:opacity-50"
+        className="rounded-full bg-pink-400 px-5 py-2 text-sm font-semibold text-pink-950 transition hover:bg-pink-300 disabled:opacity-50"
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>
@@ -187,9 +187,9 @@ export default function LinksTab({
             <button
               key={p.id}
               onClick={() => openAddModal(p)}
-              className="flex flex-col items-center gap-2 rounded-2xl border border-white/5 bg-white/[0.03] p-4 transition hover:border-emerald-400/30 hover:bg-emerald-400/10"
+              className="flex flex-col items-center gap-2 rounded-2xl border border-white/5 bg-white/[0.03] p-4 transition hover:border-pink-400/30 hover:bg-pink-400/10"
             >
-              <svg className="h-5 w-5 fill-current text-white/50 transition group-hover:text-emerald-400" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 fill-current text-white/50 transition group-hover:text-pink-400" viewBox="0 0 24 24">
                 <path d={p.icon} />
               </svg>
             </button>
@@ -219,7 +219,7 @@ export default function LinksTab({
           placeholder="https://..."
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && handleSaveUrl()}
-          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20"
         />
         <div className="mt-5 flex justify-end gap-2">
           <button
@@ -230,7 +230,7 @@ export default function LinksTab({
           </button>
           <button
             onClick={handleSaveUrl}
-            className="rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300"
+            className="rounded-xl bg-pink-400 px-5 py-2.5 text-sm font-semibold text-pink-950 transition hover:bg-pink-300"
           >
             Save
           </button>

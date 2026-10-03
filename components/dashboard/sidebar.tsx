@@ -60,7 +60,7 @@ export default async function Sidebar() {
     <aside className="fixed left-5 top-5 bottom-5 z-40 flex w-64 flex-col rounded-[2rem] border border-white/10 bg-black/30 py-4 backdrop-blur-2xl">
       <div className="flex items-center gap-2 border-b border-white/10 px-5 pb-4">
         <span className="text-lg font-bold tracking-tight text-white">
-          <span className="text-emerald-400">egirls</span>.lol
+          <span className="text-pink-400">egirls</span>.lol
         </span>
       </div>
 
@@ -83,7 +83,7 @@ export default async function Sidebar() {
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-white/10" />
           ) : (
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold text-emerald-400">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-500/20 text-sm font-bold text-pink-400">
               {session?.username?.[0]?.toUpperCase() ?? "?"}
             </div>
           )}

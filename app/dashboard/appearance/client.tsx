@@ -58,7 +58,7 @@ export default function AppearanceClient({
             onClick={() => setActive(t.id)}
             className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${
               active === t.id
-                ? "bg-emerald-400/15 text-emerald-400 ring-1 ring-emerald-400/30"
+                ? "bg-pink-400/15 text-pink-400 ring-1 ring-pink-400/30"
                 : "text-white/50 hover:bg-white/5 hover:text-white"
             }`}
           >

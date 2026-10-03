@@ -61,7 +61,7 @@ function UploadBox({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="group flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-3 transition hover:border-emerald-400/30 hover:bg-white/[0.07]"
+        className="group flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-3 transition hover:border-pink-400/30 hover:bg-white/[0.07]"
       >
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5">
           {preview ? (
@@ -134,7 +134,7 @@ export default function MediaTab({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:opacity-50"
+        className="rounded-full bg-pink-400 px-5 py-2 text-sm font-semibold text-pink-950 transition hover:bg-pink-300 disabled:opacity-50"
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>

@@ -80,7 +80,7 @@ export default function ColorsTab({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:opacity-50"
+        className="rounded-full bg-pink-400 px-5 py-2 text-sm font-semibold text-pink-950 transition hover:bg-pink-300 disabled:opacity-50"
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>

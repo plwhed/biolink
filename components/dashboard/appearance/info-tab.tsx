@@ -65,7 +65,7 @@ function UploadBox({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="group flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-3 transition hover:border-emerald-400/30 hover:bg-white/[0.07]"
+        className="group flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-3 transition hover:border-pink-400/30 hover:bg-white/[0.07]"
       >
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5">
           {preview ? (
@@ -154,7 +154,7 @@ export default function InfoTab({
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="Your display name"
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/15"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15"
         />
         <p className="mt-1 text-xs text-white/30">Shown instead of your username on your profile</p>
       </div>
@@ -167,7 +167,7 @@ export default function InfoTab({
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Tell visitors about yourself..."
           rows={3}
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/15 resize-none"
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15 resize-none"
         />
         <p className="mt-1 text-xs text-white/30">Shown below your name on your profile</p>
       </div>
@@ -179,7 +179,7 @@ export default function InfoTab({
           <button
             onClick={() => setOverlayEnabled(!overlayEnabled)}
             className={`relative h-6 w-11 rounded-full transition ${
-              overlayEnabled ? "bg-emerald-400" : "bg-white/10"
+              overlayEnabled ? "bg-pink-400" : "bg-white/10"
             }`}
           >
             <span
@@ -196,7 +196,7 @@ export default function InfoTab({
               value={overlayText}
               onChange={(e) => setOverlayText(e.target.value)}
               placeholder="Click to show"
-              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/15"
+              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15"
             />
           </div>
         )}
@@ -215,7 +215,7 @@ export default function InfoTab({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:opacity-50"
+        className="rounded-full bg-pink-400 px-5 py-2 text-sm font-semibold text-pink-950 transition hover:bg-pink-300 disabled:opacity-50"
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>

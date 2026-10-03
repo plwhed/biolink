@@ -9,7 +9,7 @@ const layouts = [
     preview: (
       <div className="flex h-full items-center justify-center">
         <div className="w-2/3 space-y-2">
-          <div className="mx-auto h-3 w-6 rounded-full bg-emerald-400/40" />
+          <div className="mx-auto h-3 w-6 rounded-full bg-pink-400/40" />
           <div className="mx-auto h-2.5 w-16 rounded-full bg-white/20" />
           <div className="mt-4 space-y-1.5">
             <div className="h-4 rounded bg-white/10" />
@@ -25,7 +25,7 @@ const layouts = [
     preview: (
       <div className="flex h-full items-center justify-center">
         <div className="w-2/3 space-y-2 pl-2">
-          <div className="h-6 w-6 rounded-full bg-emerald-400/40" />
+          <div className="h-6 w-6 rounded-full bg-pink-400/40" />
           <div className="h-2.5 w-16 rounded-full bg-white/20" />
           <div className="mt-4 space-y-1.5">
             <div className="h-4 rounded bg-white/10" />
@@ -105,7 +105,7 @@ export default function LayoutTab({
               onClick={() => setSelected(l.id)}
               className={`rounded-xl border-2 p-1 transition ${
                 selected === l.id
-                  ? "border-emerald-400 bg-emerald-400/10"
+                  ? "border-pink-400 bg-pink-400/10"
                   : "border-white/10 bg-white/5 hover:border-white/20"
               }`}
             >
@@ -137,7 +137,7 @@ export default function LayoutTab({
               }}
               className={`rounded-xl border-2 p-3 transition text-left ${
                 tiltMode === m.id
-                  ? "border-emerald-400 bg-emerald-400/10"
+                  ? "border-pink-400 bg-pink-400/10"
                   : "border-white/10 bg-white/5 hover:border-white/20"
               }`}
             >
@@ -161,7 +161,7 @@ export default function LayoutTab({
           step={20}
           value={cardWidth}
           onChange={(e) => setCardWidth(Number(e.target.value))}
-          className="w-full accent-emerald-400"
+          className="w-full accent-pink-400"
         />
         <div className="flex justify-between text-[10px] text-white/30 mt-1">
           <span>Narrow</span>
@@ -182,7 +182,7 @@ export default function LayoutTab({
             max={100}
             value={cardOpacity}
             onChange={(e) => setCardOpacity(Number(e.target.value))}
-            className="flex-1 accent-emerald-400"
+            className="flex-1 accent-pink-400"
           />
           <button
             type="button"
@@ -210,7 +210,7 @@ export default function LayoutTab({
           max={100}
           value={borderOpacity}
           onChange={(e) => setBorderOpacity(Number(e.target.value))}
-          className="w-full accent-emerald-400"
+          className="w-full accent-pink-400"
         />
         <div className="flex justify-between text-[10px] text-white/30 mt-1">
           <span>Transparent</span>
@@ -230,7 +230,7 @@ export default function LayoutTab({
           max={50}
           value={borderRadius}
           onChange={(e) => setBorderRadius(Number(e.target.value))}
-          className="w-full accent-emerald-400"
+          className="w-full accent-pink-400"
         />
         <div className="flex justify-between text-[10px] text-white/30 mt-1">
           <span>Sharp</span>
@@ -250,7 +250,7 @@ export default function LayoutTab({
           max={20}
           value={blur}
           onChange={(e) => setBlur(Number(e.target.value))}
-          className="w-full accent-emerald-400"
+          className="w-full accent-pink-400"
         />
         <div className="flex justify-between text-[10px] text-white/30 mt-1">
           <span>None</span>
@@ -261,7 +261,7 @@ export default function LayoutTab({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:opacity-50"
+        className="rounded-full bg-pink-400 px-5 py-2 text-sm font-semibold text-pink-950 transition hover:bg-pink-300 disabled:opacity-50"
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>

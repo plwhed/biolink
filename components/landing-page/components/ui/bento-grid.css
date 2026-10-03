@@ -1,0 +1,77 @@
+/* BentoGrid styles — vanilla-CSS equivalent of the Tailwind source
+ * (grid-cols-1 / md:2 / lg:4, gap-6, max-w-7xl centered). colSpan applies
+ * at the lg breakpoint; everything collapses to one column on mobile. */
+.bento-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  width: min(1060px, 94vw);
+  margin-top: 26px;
+  text-align: left;
+}
+@media (min-width: 700px) {
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .bento-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .bento-span-2 {
+    grid-column: span 2;
+  }
+}
+.bento-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #2A2A2E;
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s;
+}
+.bento-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(244, 114, 182, 0.45);
+}
+.bento-media img {
+  display: block;
+  width: 100%;
+  height: 118px;
+  object-fit: cover;
+  background: #17181A;
+}
+.bento-head {
+  display: flex;
+  gap: 12px;
+  padding: 16px 18px 18px;
+  align-items: flex-start;
+}
+.bento-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #F472B6;
+  background: rgba(244, 114, 182, 0.1);
+  border: 1px solid rgba(244, 114, 182, 0.35);
+}
+.bento-icon svg {
+  width: 17px;
+  height: 17px;
+}
+.bento-text h3 {
+  margin: 0;
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+}
+.bento-text p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.6;
+}

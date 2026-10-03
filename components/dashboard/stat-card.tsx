@@ -13,7 +13,7 @@ export default function StatCard({
 }: StatCardProps) {
   const trendColor =
     trend === "up"
-      ? "text-emerald-400"
+      ? "text-pink-400"
       : trend === "down"
         ? "text-red-400"
         : "text-white/40";

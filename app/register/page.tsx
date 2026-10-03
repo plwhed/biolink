@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import AuthCard from "@/components/auth-card";
-import LandingBackground from "@/components/landing-background";
 
 export const metadata: Metadata = {
   title: "egirls.lol — log in or sign up",
@@ -17,22 +16,44 @@ export default async function RegisterPage(
   const { username, mode } = await props.searchParams;
 
   return (
-    <LandingBackground>
-      <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-20 font-sans">
-        <Link
-          href="/"
-          className="absolute left-6 top-6 z-10 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold tracking-tight text-white backdrop-blur-md"
-        >
-          <span className="text-emerald-400">egirls</span>.lol
-        </Link>
+    <div className="relative isolate min-h-screen flex overflow-hidden bg-black">
+      {/* Same animated background as landing (needs isolate so z-index:-1 stays visible) */}
+      <div className="bg" aria-hidden="true">
+        <div className="orb orb-a" />
+        <div className="orb orb-b" />
+        <div className="grid" />
+        <div className="vignette" />
+        <div className="grain" />
+      </div>
 
-        <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/20 bg-white/10 p-8 shadow-2xl shadow-black/40 backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/40">
-          <AuthCard
-            initialMode={username ? "register" : modeFrom(mode)}
-            initialUsername={typeof username === "string" ? username : ""}
-          />
+      {/* Centered card only */}
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-20">
+        <div className="w-full max-w-md">
+          {/* Card with subtle gradient border */}
+          <div className="relative rounded-3xl bg-black/40 backdrop-blur-2xl">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-pink-500/10 via-transparent to-rose-500/10" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-r from-transparent via-pink-400/20 to-transparent" />
+
+            <div className="relative rounded-2xl border border-white/10 bg-black/60 p-8 shadow-2xl shadow-pink-500/5 backdrop-blur-2xl">
+              <AuthCard
+                initialMode={username ? "register" : modeFrom(mode)}
+                initialUsername={typeof username === "string" ? username : ""}
+              />
+            </div>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-white/40">
+            By continuing, you agree to our{" "}
+            <Link href="/terms" className="text-pink-400 hover:text-pink-300 underline underline-offset-2">
+              Terms of Service
+            </Link>
+            {" and "}
+            <Link href="/privacy" className="text-pink-400 hover:text-pink-300 underline underline-offset-2">
+              Privacy Policy
+            </Link>
+          </p>
         </div>
       </div>
-    </LandingBackground>
+    </div>
   );
 }

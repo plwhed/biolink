@@ -107,7 +107,7 @@ export default async function UserProfilePage(
           <div className="absolute inset-0 bg-black/50" />
         </div>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/40 via-zinc-950 to-zinc-950" />
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-950/40 via-zinc-950 to-zinc-950" />
       )}
 
       <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
@@ -122,7 +122,7 @@ export default async function UserProfilePage(
             yellow: "#eab308",
             cyan: "#06b6d4",
           };
-          const accent = accentColors[accentColor] ?? "#10b981";
+          const accent = accentColors[accentColor] ?? "#F472B6";
           const badgeColors: Record<string, string> = {
             emerald: "#10b981",
             blue: "#3b82f6",
@@ -133,7 +133,7 @@ export default async function UserProfilePage(
             yellow: "#eab308",
             cyan: "#06b6d4",
           };
-          const badgeAccent = badgeColors[badgeColor] ?? "#10b981";
+          const badgeAccent = badgeColors[badgeColor] ?? "#F472B6";
           const socialColors: Record<string, string> = {
             white: "#ffffff",
             emerald: "#10b981",
@@ -153,7 +153,7 @@ export default async function UserProfilePage(
             yellow: "#eab308",
             cyan: "#06b6d4",
           };
-          const linkHoverAccent = linkHoverColors[linkHoverColor] ?? "#10b981";
+          const linkHoverAccent = linkHoverColors[linkHoverColor] ?? "#F472B6";
 
           const cardBg = `rgba(17, 17, 17, ${cardOpacity / 100})`;
           const cardBorder = `rgba(255, 255, 255, ${borderOpacity / 100 * 0.1})`;
@@ -179,7 +179,7 @@ const card = (
                         className="h-20 w-20 rounded-full object-cover ring-2 ring-white/10"
                       />
                     ) : (
-                      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 text-3xl font-bold text-emerald-400">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-pink-500/20 text-3xl font-bold text-pink-400">
                         {displayName[0].toUpperCase()}
                       </div>
                     )}

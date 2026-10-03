@@ -11,8 +11,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Figtree", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-mono: "Fragment Mono", ui-monospace, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,7 +25,27 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Figtree", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: "Fragment Mono", ui-monospace, monospace;
+}
+
+::selection {
+  background: #f472b6;
+  color: #3b0a1e;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #f9a8d4;
+  outline-offset: 3px;
 }
 
 @keyframes fade-slide-in {
@@ -75,30 +95,8 @@ body {
   animation: fade-slide-in 0.4s ease both;
 }
 
-/* floating background orbs */
-@keyframes orb-float {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(40px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-30px, 30px) scale(0.95);
-  }
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-}
-
-.orb {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(70px);
-  opacity: 0.55;
-  animation: orb-float 18s ease-in-out infinite;
-  pointer-events: none;
-}
+/* NOTE: landing orbs are styled by app/landing.css (.orb / .orb-a / .orb-b).
+   No other globals here may target those class names. */
 
 .noise-darken {
   position: fixed;

@@ -1,0 +1,88 @@
+/* LiquidGlassAccordion styles — vanilla-CSS equivalent of the Tailwind
+ * source, locked to this page's dark theme (the .dark token set, applied
+ * as the base since the page is dark-only). */
+.lg-acc {
+  --lg-text: #f8fafc;
+  --lg-text-secondary: rgba(255, 255, 255, 0.62);
+  --lg-text-muted: rgba(255, 255, 255, 0.38);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(640px, 92vw);
+  margin-top: 26px;
+  text-align: left;
+}
+.lg-item {
+  overflow: hidden;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(17px) saturate(1.4);
+  -webkit-backdrop-filter: blur(17px) saturate(1.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 18px 50px -20px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.25s;
+}
+.lg-item.open {
+  border-color: rgba(244, 114, 182, 0.35);
+}
+.lg-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: var(--lg-text-secondary);
+  transition: color 0.2s;
+}
+.lg-btn:hover,
+.lg-item.open .lg-btn {
+  color: var(--lg-text);
+}
+.lg-ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--lg-text-muted);
+}
+.lg-ico svg {
+  width: 16px;
+  height: 16px;
+}
+.lg-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+.lg-chev {
+  flex: none;
+  display: flex;
+  color: var(--lg-text-muted);
+}
+.lg-body {
+  padding: 0 20px 16px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--lg-text-secondary);
+}
+.faq-h {
+  margin: 0;
+  font-size: clamp(30px, 4.6vw, 52px);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  text-wrap: balance;
+  max-width: 16ch;
+}
+@media (max-width: 760px) {
+  .lg-acc {
+    margin-top: 20px;
+  }
+}

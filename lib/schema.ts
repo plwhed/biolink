@@ -82,7 +82,7 @@ export const badges = pgTable("badges", {
   name: text("name").notNull().unique(),
   iconPrefix: text("icon_prefix").notNull().default("solid"),
   iconName: text("icon_name").notNull(),
-  color: text("color").notNull().default("emerald"),
+  color: text("color").notNull().default("pink"),
 });
 
 export const userBadges = pgTable("user_badges", {

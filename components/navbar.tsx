@@ -11,13 +11,13 @@ export default async function Navbar() {
           href="/"
           className="font-semibold tracking-tight text-white"
         >
-          <span className="text-emerald-300">egirls</span>.lol
+          <span className="text-pink-300">egirls</span>.lol
         </Link>
         <div className="flex items-center gap-1">
           {session ? (
             <Link
               href="/dashboard"
-              className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-medium text-emerald-950 transition-colors hover:bg-emerald-300"
+              className="rounded-full bg-pink-400 px-4 py-2 text-sm font-medium text-pink-950 transition-colors hover:bg-pink-300"
             >
               Dashboard
             </Link>
@@ -31,7 +31,7 @@ export default async function Navbar() {
               </Link>
               <Link
                 href="/register?mode=register"
-                className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-medium text-emerald-950 transition-colors hover:bg-emerald-300"
+                className="rounded-full bg-pink-400 px-4 py-2 text-sm font-medium text-pink-950 transition-colors hover:bg-pink-300"
               >
                 Sign up
               </Link>

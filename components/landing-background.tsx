@@ -43,9 +43,9 @@ export default function LandingBackground({
   return (
     <>
       <NoiseGradientBackground
-        primaryColor="emerald-500/25"
-        secondaryColor="green-400/20"
-        tertiaryColor="lime-300/15"
+        primaryColor="rgba(244,114,182,0.28)"
+        secondaryColor="rgba(232,121,249,0.20)"
+        tertiaryColor="rgba(251,207,232,0.16)"
         primaryBlur={100}
         secondaryBlur={100}
         tertiaryBlur={100}
@@ -53,7 +53,7 @@ export default function LandingBackground({
         microNoiseOpacity={10}
         vignetteIntensity="strong"
         className="min-h-screen"
-        theme="green"
+        theme="custom"
       />
       <div className="noise-darken" />
       <div className="relative z-10 min-h-screen">{children}</div>
