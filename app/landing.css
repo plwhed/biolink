@@ -1,3 +1,7 @@
+/* Scoped to the components layer so Tailwind utilities (e.g. text-pink-400,
+   grid grid-cols-*) always win over these landing-page styles. */
+@layer components {
+
 :root {
   --bg: #000;
   --acc: #F472B6;
@@ -93,7 +97,7 @@ a:focus-visible, button:focus-visible {
 @keyframes driftB {
   to { margin-top: -34px; margin-left: 30px; }
 }
-.grid {
+.bg-grid {
   position: absolute;
   inset: 0;
   background-image:
@@ -1011,7 +1015,7 @@ a:focus-visible, button:focus-visible {
 }
 /* backdrop deepens as the camera dives */
 .vignette { opacity: calc(0.7 + var(--jp, 0) * 0.3); }
-.grid { opacity: calc(0.5 - var(--jp, 0) * 0.3); }
+.bg-grid { opacity: calc(0.5 - var(--jp, 0) * 0.3); }
 /* how-it-works steps */
 .steps {
   display: flex;
@@ -1492,3 +1496,5 @@ a:focus-visible, button:focus-visible {
   }
   .rv { transition: none; opacity: 1; transform: none; }
 }
+
+} /* @layer components */

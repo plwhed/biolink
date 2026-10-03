@@ -21,7 +21,7 @@ export default async function RegisterPage(
       <div className="bg" aria-hidden="true">
         <div className="orb orb-a" />
         <div className="orb orb-b" />
-        <div className="grid" />
+        <div className="bg-grid" />
         <div className="vignette" />
         <div className="grain" />
       </div>
