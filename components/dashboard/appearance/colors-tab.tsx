@@ -30,17 +30,26 @@ export default function ColorsTab({
   const [colors, setColors] = useState<Record<ColorKey, string>>(initialColors);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   async function handleSave() {
     setSaving(true);
-    await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(colors),
-    });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setSaved(false);
+    setSaveError("");
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(colors),
+      });
+      if (!response.ok) throw new Error("Could not save your color settings.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save your color settings.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -84,6 +93,7 @@ export default function ColorsTab({
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>
+      {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
     </div>
   );
 }

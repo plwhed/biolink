@@ -41,6 +41,7 @@ export async function PUT(req: Request) {
   const body = await req.json();
 
   const profileData: Record<string, string | number | null> = {};
+  if (body.displayName !== undefined) profileData.displayName = body.displayName || null;
   if (body.layout !== undefined) profileData.layout = body.layout;
   if (body.avatarUrl !== undefined) profileData.avatarUrl = body.avatarUrl || null;
   if (body.backgroundUrl !== undefined) profileData.backgroundUrl = body.backgroundUrl || null;

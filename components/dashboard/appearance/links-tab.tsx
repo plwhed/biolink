@@ -61,6 +61,7 @@ export default function LinksTab({
   );
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const [showPlatformModal, setShowPlatformModal] = useState(false);
   const [showUrlModal, setShowUrlModal] = useState(false);
@@ -123,14 +124,22 @@ export default function LinksTab({
 
   async function handleSave() {
     setSaving(true);
-    await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ socialLinks: links.map((l, i) => ({ ...l, order: i })) }),
-    });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setSaved(false);
+    setSaveError("");
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ socialLinks: links.map((l, i) => ({ ...l, order: i })) }),
+      });
+      if (!response.ok) throw new Error("Could not save your social links.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save your social links.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -179,6 +188,7 @@ export default function LinksTab({
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>
+      {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
 
       <Modal open={showPlatformModal} onClose={() => setShowPlatformModal(false)}>
         <p className="mb-4 text-sm font-medium text-white/60">Select platform</p>

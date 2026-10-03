@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
-import { users } from "@/lib/schema";
+import { profiles, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
@@ -59,6 +59,8 @@ export async function POST(req: Request) {
       .insert(users)
       .values({ username, email, passwordHash })
       .returning({ id: users.id, username: users.username });
+
+    await db.insert(profiles).values({ userId: user.id });
 
     return NextResponse.json({
       ok: true,

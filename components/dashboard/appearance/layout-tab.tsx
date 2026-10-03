@@ -66,26 +66,35 @@ export default function LayoutTab({
   const [borderOpacity, setBorderOpacity] = useState(initialBorderOpacity);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   async function handleSave() {
     setSaving(true);
-    await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        layout: selected,
-        blur,
-        tiltEnabled,
-        tiltMode,
-        borderRadius,
-        cardWidth,
-        cardOpacity,
-        borderOpacity,
-      }),
-    });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setSaved(false);
+    setSaveError("");
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          layout: selected,
+          blur,
+          tiltEnabled,
+          tiltMode,
+          borderRadius,
+          cardWidth,
+          cardOpacity,
+          borderOpacity,
+        }),
+      });
+      if (!response.ok) throw new Error("Could not save your layout settings.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save your layout settings.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function setFullTransparent() {
@@ -265,6 +274,7 @@ export default function LayoutTab({
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>
+      {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
     </div>
   );
 }

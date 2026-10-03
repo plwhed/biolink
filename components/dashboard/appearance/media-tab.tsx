@@ -111,17 +111,26 @@ export default function MediaTab({
   const [cursor, setCursor] = useState(initialCursor ?? "");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   async function handleSave() {
     setSaving(true);
-    await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ avatarUrl: avatar, backgroundUrl: background, cursorUrl: cursor }),
-    });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setSaved(false);
+    setSaveError("");
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: avatar, backgroundUrl: background, cursorUrl: cursor }),
+      });
+      if (!response.ok) throw new Error("Could not save your media settings.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save your media settings.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -138,6 +147,7 @@ export default function MediaTab({
       >
         {saved ? "Saved!" : saving ? "Saving..." : "Save"}
       </button>
+      {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
     </div>
   );
 }
