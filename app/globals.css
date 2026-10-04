@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+/* include the noise-gradient-bg library's class names */
+@source "../node_modules/noise-gradient-bg";
+
+:root {
+  --background: #080808;
+  --foreground: #ededed;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Montserrat", "Figtree", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-mono: "Fragment Mono", ui-monospace, monospace;
+  --font-luckiest: "Luckiest Guy", cursive;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #080808;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Figtree", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: "Fragment Mono", ui-monospace, monospace;
+}
+
+::selection {
+  background: #f472b6;
+  color: #3b0a1e;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #f9a8d4;
+  outline-offset: 3px;
+}
+
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease both;
+}
+
+@keyframes auth-mesh {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.15) rotate(8deg);
+  }
+  100% {
+    transform: scale(1) rotate(-6deg);
+  }
+}
+
+@keyframes auth-dots {
+  0% {
+    opacity: 0.15;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0.5;
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-slide-in {
+  animation: fade-slide-in 0.4s ease both;
+}
+
+/* NOTE: landing orbs are styled by app/landing.css (.orb / .orb-a / .orb-b).
+   No other globals here may target those class names. */
+
+.noise-darken {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* Flat a-solid surface instead of glass */
+.glass {
+  background: #0a0a0e;
+  border: 1px solid #1a1a1e;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.glass-strong {
+  background: #0f0f13;
+  border: 1px solid #1a1a1e;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass-strong {
+    background: #0f0f13;
+    border: 1px solid #1a1a1e;
+  }
+}

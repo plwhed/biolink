@@ -1,0 +1,181 @@
+/*
+ * bits.css — vanilla-CSS skins for the vendored Magic UI assets
+ * (Marquee / ShinyButton / MagicCard / BorderBeam) plus the BlurText
+ * segment helper. Verbatim vendor styles (StarBorder.css, Galaxy.css)
+ * live in their own files. Accent: pink #F472B6 on zinc-black.
+ */
+
+.blur-seg {
+  display: inline-block;
+  will-change: transform, filter, opacity;
+}
+.blur-wrap {
+  display: inline-flex;
+}
+.seg-accent {
+  background: linear-gradient(100deg, #F472B6, #FBCFE8 60%, #F472B6);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: segAccentPan 5s linear 2.6s infinite;
+}
+@keyframes segAccentPan {
+  to { background-position: 200% center; }
+}
+.sub-blur {
+  justify-content: center;
+}
+
+/* ---- Magic UI Marquee (same contract: --mq-duration / --mq-gap) ---- */
+.mqr {
+  overflow: hidden;
+  display: flex;
+  gap: var(--mq-gap, 40px);
+  padding: 8px;
+}
+.mqr.mqr-col {
+  flex-direction: column;
+}
+.mqr-row {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-around;
+  gap: var(--mq-gap, 40px);
+  animation: mqr-scroll var(--mq-duration, 26s) linear infinite;
+}
+.mqr-row.mqr-row-col {
+  flex-direction: column;
+}
+.mqr-row.mqr-rev {
+  animation-direction: reverse;
+}
+.mqr-pause:hover .mqr-row {
+  animation-play-state: paused;
+}
+@keyframes mqr-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--mq-gap, 40px))); }
+}
+
+/* ---- Magic UI ShinyButton, pink pill skin ---- */
+.shinybtn {
+  position: relative;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 14px 28px;
+  font-weight: 700;
+  font-size: 15px;
+  font-family: inherit;
+  color: #3B0A1E;
+  background: linear-gradient(180deg, #F9A8D4, #F472B6);
+  box-shadow:
+    0 0.7px 0.7px -0.6px rgba(0, 0, 0, 0.4),
+    0 14px 28px -14px rgba(244, 114, 182, 0.45);
+  overflow: hidden;
+  white-space: nowrap;
+  transition: box-shadow 0.25s ease-out;
+}
+.shinybtn:hover {
+  box-shadow: 0 18px 34px -14px rgba(244, 114, 182, 0.55);
+}
+.shinybtn-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  -webkit-mask-image: linear-gradient(
+    -75deg,
+    #3B0A1E calc(var(--x) + 20%),
+    transparent calc(var(--x) + 30%),
+    #3B0A1E calc(var(--x) + 100%)
+  );
+  mask-image: linear-gradient(
+    -75deg,
+    #3B0A1E calc(var(--x) + 20%),
+    transparent calc(var(--x) + 30%),
+    #3B0A1E calc(var(--x) + 100%)
+  );
+}
+.shinybtn-edge {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    -75deg,
+    transparent calc(var(--x) + 20%),
+    rgba(255, 255, 255, 0.55) calc(var(--x) + 25%),
+    transparent calc(var(--x) + 100%)
+  );
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---- Magic UI MagicCard spotlight, borderless (editorial rows keep hairlines) ---- */
+.magic-spot {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.magic-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 1px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.magic-spot:hover .magic-glow {
+  opacity: 1;
+}
+.magic-inner {
+  position: relative;
+  display: contents;
+}
+:root {
+  --mc-bg: transparent;
+  --mc-border: transparent;
+}
+
+/* ---- Magic UI BorderBeam, plain-CSS mask version ---- */
+.bb-wrap {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: var(--bb-width, 1px) solid transparent;
+  -webkit-mask: linear-gradient(transparent, transparent), linear-gradient(#000, #000);
+  -webkit-mask-composite: source-in;
+  mask: linear-gradient(transparent, transparent), linear-gradient(#000, #000);
+  mask-composite: intersect;
+  -webkit-mask-clip: padding-box, border-box;
+  mask-clip: padding-box, border-box;
+}
+.bb-beam {
+  position: absolute;
+  aspect-ratio: 1;
+  background: linear-gradient(to left, var(--beam-from, #F9A8D4), var(--beam-to, #F472B6), transparent);
+}
+
+/* ---- StarBorder pill override for the footer CTA ---- */
+.foot-star {
+  border-radius: 999px;
+}
+.foot-star .inner-content {
+  border-radius: 999px;
+  padding: 16px 34px;
+  font-weight: 700;
+  font-size: 16px;
+  border-color: #2E2E33;
+  background: #0C0E0B;
+  color: #FAFAF9;
+}
+.foot-star-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
