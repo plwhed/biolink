@@ -36,6 +36,7 @@ export const profiles = pgTable("profiles", {
   tiltEnabled: integer("tilt_enabled").notNull().default(0),
   tiltMode: text("tilt_mode").notNull().default("tilt"),
   borderRadius: integer("border_radius").notNull().default(24),
+  borderWidth: integer("border_width").notNull().default(1),
 
   description: text("description"),
   displayName: text("display_name"),

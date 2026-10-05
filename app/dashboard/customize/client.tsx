@@ -1,26 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import LayoutTab from "@/components/dashboard/appearance/layout-tab";
-import ColorsTab, {
-  ColorPickerField,
-} from "@/components/dashboard/appearance/colors-tab";
+import { ColorPickerField } from "@/components/dashboard/appearance/colors-tab";
 import MediaTab from "@/components/dashboard/appearance/media-tab";
-import CardSettings, {
-  Range,
-} from "@/components/dashboard/appearance/card-settings";
 
 const tabs = [
   {
     id: "assets",
     label: "Assets",
-    icon: "M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z",
+    icon: "M2.25 12h15M3.75 7.5h16.5M3.75 12h16.5m-16.5 4.5h16.5",
   },
   {
     id: "appearance",
     label: "Appearance",
-    icon: "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17a4 4 0 01-4-4v-4",
+    icon: "M10.5 6h9.75M10.5 6v11.25m0-11.25l-3 3m3-3l3 3m-3-3v11.25M3 6h18M3 6v11.25m0-11.25l3 3m-3-3l3 3",
   },
   {
     id: "layout",
@@ -52,35 +48,202 @@ interface Profile {
   linkHoverColor: string;
 }
 
+type SocialLink = {
+  platform: string;
+  url: string;
+  order: number;
+};
+
+function Slider({
+  label,
+  value,
+  unit,
+  min,
+  max,
+  step = 1,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  min: number;
+  max: number;
+  step?: number;
+  onChange: (v: number) => void;
+}) {
+  const track = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const raf = useRef<number | null>(null);
+  const pending = useRef<number | null>(null);
+  const last = useRef(value);
+  const onChangeRef = useRef(onChange);
+  const [drag, setDrag] = useState<number | null>(null);
+
+  onChangeRef.current = onChange;
+  last.current = dragging.current ? last.current : value;
+
+  useEffect(
+    () => () => {
+      if (raf.current !== null) cancelAnimationFrame(raf.current);
+    },
+    []
+  );
+
+  const shown = drag ?? value;
+  const pct = ((shown - min) / (max - min)) * 100;
+
+  const emit = (v: number) => {
+    pending.current = v;
+    if (raf.current !== null) return;
+    raf.current = requestAnimationFrame(() => {
+      raf.current = null;
+      const n = pending.current;
+      pending.current = null;
+      if (n !== null && n !== last.current) {
+        last.current = n;
+        onChangeRef.current(n);
+      }
+    });
+  };
+
+  const handle = (clientX: number) => {
+    const el = track.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = Math.min(Math.max((clientX - r.left) / r.width, 0), 1);
+    const raw = min + x * (max - min);
+    setDrag(raw);
+    const stepped = Math.min(Math.max(Math.round(raw / step) * step, min), max);
+    emit(stepped);
+  };
+
+  const end = () => {
+    dragging.current = false;
+    setDrag(null);
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-base font-semibold text-white">{label}</p>
+        <span className="text-sm font-medium tabular-nums text-white/60">
+          {value}
+          {unit}
+        </span>
+      </div>
+
+      <div
+        className="cursor-pointer touch-none py-2.5"
+        onPointerDown={(e) => {
+          dragging.current = true;
+          e.currentTarget.setPointerCapture(e.pointerId);
+          handle(e.clientX);
+        }}
+        onPointerMove={(e) => {
+          if (dragging.current) handle(e.clientX);
+        }}
+        onPointerUp={end}
+        onPointerCancel={end}
+      >
+        <div ref={track} className="relative mx-2 h-2 rounded-full bg-[#1b1b1b]">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-pink-500 transition-[width] duration-200 ease-out will-change-[width]"
+            style={{ width: `${pct}%` }}
+          />
+          <div
+            className={`pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white transition-[left,transform] duration-200 ease-out will-change-[left] ${
+              drag !== null ? "scale-125" : "scale-100"
+            }`}
+            style={{ left: `${pct}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  description,
+  icon,
+  children,
+}: {
+  title: string;
+  description: string;
+  icon: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d]">
+      <div className="flex items-center gap-4 border-b border-[#1b1b1b] p-6">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-pink-500/20">
+          <svg
+            className="h-6 w-6 text-pink-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-2xl font-bold text-white">{title}</h3>
+          <p className="text-zinc-400">{description}</p>
+        </div>
+      </div>
+      <div className="p-6">{children}</div>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-semibold text-white/60">{label}</label>
+      {children}
+    </div>
+  );
+}
+
 export default function AppearanceClient({
   profile,
   socialLinks,
 }: {
   profile: Profile | null;
-  socialLinks: {
-    platform: string;
-    url: string;
-    order: number;
-  }[];
+  socialLinks: SocialLink[];
 }) {
+  const router = useRouter();
   const [active, setActive] = useState("assets");
   const [appearanceSettings, setAppearanceSettings] = useState<any>({});
-  const [displayName, setDisplayName] = useState(
-    profile?.displayName ?? ""
-  );
-  const [description, setDescription] = useState(
-    profile?.description ?? ""
-  );
+  const [displayName, setDisplayName] = useState(profile?.displayName ?? "");
+  const [description, setDescription] = useState(profile?.description ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [openSection, setOpenSection] = useState<string | null>("main");
+  const [failed, setFailed] = useState(false);
+  const [errorText, setErrorText] = useState("");
+
+  const get = <K extends keyof Profile>(key: K, fallback: Profile[K]) =>
+    (appearanceSettings[key] ?? profile?.[key] ?? fallback) as Profile[K];
+
+  const set = (key: keyof Profile) => (v: any) =>
+    setAppearanceSettings((prev: any) => ({ ...prev, [key]: v }));
 
   async function handleSaveAppearance() {
     setSaving(true);
+    setFailed(false);
+    setErrorText("");
 
     try {
       const response = await fetch("/api/profile", {
         method: "PUT",
+        cache: "no-store",
         headers: {
           "Content-Type": "application/json",
         },
@@ -92,29 +255,52 @@ export default function AppearanceClient({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save appearance");
+        let detail = `${response.status} ${response.statusText}`;
+        try {
+          const text = await response.text();
+          if (text) detail = `${detail}: ${text.slice(0, 200)}`;
+        } catch {}
+        throw new Error(detail);
       }
 
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (e) {
+      router.refresh();
+    } catch (e: any) {
       console.error(e);
+      setFailed(true);
+      setErrorText(e?.message ?? "Request failed");
+      setTimeout(() => setFailed(false), 2500);
     } finally {
       setSaving(false);
     }
   }
 
-  const toggleSection = (section: string) => {
-    setOpenSection((prev) =>
-      prev === section ? null : section
-    );
-  };
+  const accent = get("accentColor", "#ffffff");
+  const textColor = get("linkHoverColor", "#ffffff");
+  const borderColor = get("socialColor", "#ffffff");
+  const bgColor = get("badgeColor", "#0d0d0d");
+  const borderOpacity = get("borderOpacity", 100);
+  const cardOpacity = get("cardOpacity", 100);
+  const borderWidth = get("borderWidth", 1);
+  const borderRadius = get("borderRadius", 24);
+  const blur = get("blur", 0);
+
+  const previewBackground = profile?.backgroundUrl
+    ? {
+        backgroundImage: `url(${profile.backgroundUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }
+    : {
+        backgroundImage:
+          "radial-gradient(circle at 20% 20%, rgba(236,72,153,0.35), transparent 50%), radial-gradient(circle at 80% 80%, rgba(99,102,241,0.3), transparent 50%)",
+        backgroundColor: "#050505",
+      };
 
   return (
     <div className="flex flex-col">
-      <h1 className="text-2xl font-bold tracking-tight">
-        Customize
-      </h1>
+      <h1 className="text-4xl font-bold tracking-tight">Customize</h1>
 
       <p className="mt-1 text-sm text-white/50">
         Customize how your profile looks.
@@ -126,26 +312,12 @@ export default function AppearanceClient({
             key={t.id}
             type="button"
             onClick={() => setActive(t.id)}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${
+            className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${
               active === t.id
                 ? "bg-pink-400/15 text-pink-400 ring-1 ring-pink-400/30"
                 : "text-white/50 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d={t.icon}
-              />
-            </svg>
-
             {t.label}
           </button>
         ))}
@@ -153,331 +325,186 @@ export default function AppearanceClient({
 
       <div className="mt-6">
         {active === "appearance" && (
-          <div className="space-y-8">
-            <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-6">
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-6 lg:col-span-2">
               <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/20">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6 text-pink-500"
-                    >
-                      <path d="M12 3v12" />
-                      <path d="m17 8-5-5-5 5" />
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    </svg>
-                  </div>
-                </div>
-
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-white">
                     Appearance Settings
                   </h2>
 
                   <p className="text-zinc-400">
-                    Customize how your profile looks and feels.
+                    Customize how your profile looks and feels!
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-8">
-              {/* Main Information */}
-
-              <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-col">
-                      <label className="mb-1.5 block text-sm font-semibold text-white/60">
-                        Display Name
-                      </label>
-
-                      <input
-                        type="text"
-                        value={displayName}
-                        onChange={(e) =>
-                          setDisplayName(e.target.value)
-                        }
-                        className="w-full rounded-xl border border-[#1b1b1b] bg-[#080808] px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/20"
-                      />
-                    </div>
-
-                    <div className="flex flex-col">
-                      <label className="mb-1.5 block text-sm font-semibold text-white/60">
-                        Description
-                      </label>
-
-                      <textarea
-                        value={description}
-                        onChange={(e) =>
-                          setDescription(e.target.value)
-                        }
-                        rows={2}
-                        className="w-full resize-none rounded-xl border border-[#1b1b1b] bg-[#080808] px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/20"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <ColorPickerField
-                      label="Primary Color"
-                      description="Main accent color for the profile"
-                      value={
-                        appearanceSettings.accentColor ??
-                        profile?.accentColor ??
-                        "#ffffff"
-                      }
-                      onChange={(v) =>
-                        setAppearanceSettings((prev: any) => ({
-                          ...prev,
-                          accentColor: v,
-                        }))
-                      }
+            <div className="space-y-6">
+              <Section
+                title="Identity"
+                description="Name and bio shown on your profile"
+                icon="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+              >
+                <div className="space-y-5">
+                  <Field label="Display Name">
+                    <input
+                      type="text"
+                      name="profile-display-name"
+                      value={displayName}
+                      maxLength={40}
+                      placeholder="Your name"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
+                      data-lpignore="true"
+                      data-1p-ignore="true"
+                      data-form-type="other"
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      className="w-full rounded-xl border border-[#1b1b1b] bg-[#080808] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-pink-400/40 focus:ring-2 focus:ring-pink-400/10"
                     />
+                  </Field>
 
-                    <ColorPickerField
-                      label="Text Color"
-                      description="General text color for elements"
-                      value={
-                        appearanceSettings.linkHoverColor ??
-                        profile?.linkHoverColor ??
-                        "#ffffff"
-                      }
-                      onChange={(v) =>
-                        setAppearanceSettings((prev: any) => ({
-                          ...prev,
-                          linkHoverColor: v,
-                        }))
-                      }
+                  <Field label="Description">
+                    <textarea
+                      name="profile-description"
+                      value={description}
+                      maxLength={160}
+                      rows={3}
+                      placeholder="Tell people about yourself"
+                      autoComplete="off"
+                      data-lpignore="true"
+                      data-1p-ignore="true"
+                      data-form-type="other"
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full resize-none rounded-xl border border-[#1b1b1b] bg-[#080808] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-pink-400/40 focus:ring-2 focus:ring-pink-400/10"
                     />
-                  </div>
+                    <span className="self-end text-xs text-white/30">
+                      {description.length}/160
+                    </span>
+                  </Field>
                 </div>
-              </div>
+              </Section>
 
-              {/* Card Style */}
-              <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-4">
-                <div className="mb-4">
-                  <span className="text-sm font-medium">Card Style</span>
+              <Section
+                title="Colors"
+                description="Accent and text colors"
+                icon="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402a3.75 3.75 0 00-.615-5.77 3.75 3.75 0 00-5.77-.615L3.01 13.516a3.75 3.75 0 001.088 6.386z"
+              >
+                <div className="grid grid-cols-1 gap-x-10 gap-y-5 md:grid-cols-2">
+                  <ColorPickerField
+                    label="Primary Color"
+                    description="Main accent color for the profile"
+                    value={accent}
+                    onChange={set("accentColor")}
+                  />
+
+                  <ColorPickerField
+                    label="Text Color"
+                    description="General text color for elements"
+                    value={textColor}
+                    onChange={set("linkHoverColor")}
+                  />
                 </div>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="flex flex-col gap-6">
-                    {/* Border Group */}
-                    <div className="flex flex-col gap-4 rounded-xl border border-[#1b1b1b] bg-[#080808] p-4">
-                      <ColorPickerField
-                        label="Border Color"
-                        description="Card border color"
-                        value={
-                          appearanceSettings.socialColor ??
-                          profile?.socialColor ??
-                          "#ffffff"
-                        }
-                        onChange={(v) =>
-                          setAppearanceSettings((prev: any) => ({
-                            ...prev,
-                            socialColor: v,
-                          }))
-                        }
-                      />
-                      <Range
-                        label="Border Opacity"
-                        value={
-                          appearanceSettings.borderOpacity ??
-                          profile?.borderOpacity ??
-                          100
-                        }
-                        unit="%"
-                        min={0}
-                        max={100}
-                        left="Transparent"
-                        right="Opaque"
-                        onChange={(v) =>
-                          setAppearanceSettings((prev: any) => ({
-                            ...prev,
-                            borderOpacity: v,
-                          }))
-                        }
-                      />
-                    </div>
+              </Section>
 
-                    <Range
-                      label="Border Width"
-                      value={
-                        appearanceSettings.borderWidth ??
-                        profile?.borderWidth ??
-                        1
-                      }
-                      unit="px"
-                      min={0}
-                      max={10}
-                      step={1}
-                      left="Thin"
-                      right="Thick"
-                      onChange={(v) =>
-                        setAppearanceSettings((prev: any) => ({
-                          ...prev,
-                          borderWidth: v,
-                        }))
-                      }
-                    />
-                  </div>
+              <Section
+                title="Card"
+                description="Border, background and shape of your card"
+                icon="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z"
+              >
+                <div className="grid grid-cols-1 gap-x-10 gap-y-5 md:grid-cols-2">
+                  <ColorPickerField
+                    label="Border Color"
+                    description="Card border color"
+                    value={borderColor}
+                    onChange={set("socialColor")}
+                    opacity={borderOpacity}
+                    onOpacityChange={set("borderOpacity")}
+                  />
 
-                  <div className="flex flex-col gap-6">
-                    {/* Background Group */}
-                    <div className="flex flex-col gap-4 rounded-xl border border-[#1b1b1b] bg-[#080808] p-4">
-                      <ColorPickerField
-                        label="Background Color"
-                        description="Card background color"
-                        value={
-                          appearanceSettings.badgeColor ??
-                          profile?.badgeColor ??
-                          "#ffffff"
-                        }
-                        onChange={(v) =>
-                          setAppearanceSettings((prev: any) => ({
-                            ...prev,
-                            badgeColor: v,
-                          }))
-                        }
-                      />
-                      <Range
-                        label="Card Opacity"
-                        value={
-                          appearanceSettings.cardOpacity ??
-                          profile?.cardOpacity ??
-                          100
-                        }
-                        unit="%"
-                        min={0}
-                        max={100}
-                        left="Transparent"
-                        right="Opaque"
-                        onChange={(v) =>
-                          setAppearanceSettings((prev: any) => ({
-                            ...prev,
-                            cardOpacity: v,
-                          }))
-                        }
-                      />
-                    </div>
+                  <ColorPickerField
+                    label="Background Color"
+                    description="Card background color"
+                    value={bgColor}
+                    onChange={set("badgeColor")}
+                    opacity={cardOpacity}
+                    onOpacityChange={set("cardOpacity")}
+                  />
 
-                    {/* Effects Group */}
-                    <div className="flex flex-col gap-4 rounded-xl border border-[#1b1b1b] bg-[#080808] p-4">
-                      <Range
-                        label="Border Radius"
-                        value={
-                          appearanceSettings.borderRadius ??
-                          profile?.borderRadius ??
-                          24
-                        }
-                        unit="px"
-                        min={0}
-                        max={50}
-                        left="Sharp"
-                        right="Rounded"
-                        onChange={(v) =>
-                          setAppearanceSettings((prev: any) => ({
-                            ...prev,
-                            borderRadius: v,
-                          }))
-                        }
-                      />
-                      <Range
-                        label="Background Blur"
-                        value={
-                          appearanceSettings.blur ??
-                          profile?.blur ??
-                          0
-                        }
-                        unit="px"
-                        min={0}
-                        max={20}
-                        left="None"
-                        right="Heavy"
-                        onChange={(v) =>
-                          setAppearanceSettings((prev: any) => ({
-                            ...prev,
-                            blur: v,
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  <Slider
+                    label="Border Width"
+                    value={borderWidth}
+                    unit="px"
+                    min={0}
+                    max={10}
+                    onChange={set("borderWidth")}
+                  />
 
-              {/* Effects */}
-              <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <Range
+                  <Slider
                     label="Border Radius"
-                    value={
-                      appearanceSettings.borderRadius ??
-                      profile?.borderRadius ??
-                      24
-                    }
+                    value={borderRadius}
                     unit="px"
                     min={0}
                     max={50}
-                    left="Sharp"
-                    right="Rounded"
-                    onChange={(v) =>
-                      setAppearanceSettings((prev: any) => ({
-                        ...prev,
-                        borderRadius: v,
-                      }))
-                    }
+                    onChange={set("borderRadius")}
                   />
 
-                  <Range
-                    label="Background Blur"
-                    value={
-                      appearanceSettings.blur ??
-                      profile?.blur ??
-                      0
-                    }
-                    unit="px"
-                    min={0}
-                    max={20}
-                    left="None"
-                    right="Heavy"
-                    onChange={(v) =>
-                      setAppearanceSettings((prev: any) => ({
-                        ...prev,
-                        blur: v,
-                      }))
-                    }
-                  />
+                  <div className="md:col-span-2">
+                    <Slider
+                      label="Background Blur"
+                      value={blur}
+                      unit="px"
+                      min={0}
+                      max={20}
+                      onChange={set("blur")}
+                    />
+                  </div>
                 </div>
-              </div>
+              </Section>
             </div>
 
-            <div className="flex items-center justify-end">
+            <aside className="lg:sticky lg:top-6">
+              <div className="overflow-hidden rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d]">
+                <div className="border-b border-[#1b1b1b] px-5 py-3">
+                  <span className="text-sm font-semibold text-white">
+                    nghh nghh ughhhh 
+                  </span>
+                </div>
+
+                <div
+                  className="flex min-h-[420px] items-center justify-center p-6"
+                  style={previewBackground}
+                >
+                  <span className="text-2xl font-bold text-white">
+                    dick
+                  </span>
+                </div>
+              </div>
+            </aside>
+
+            <div className="flex flex-col items-end gap-2 lg:col-span-2">
               <button
                 type="button"
                 onClick={handleSaveAppearance}
                 disabled={saving}
-                className="rounded-xl bg-pink-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pink-400 disabled:opacity-50"
+                className="rounded-xl bg-pink-500 px-8 py-2.5 text-sm font-semibold text-white transition hover:bg-pink-400 active:scale-95 disabled:opacity-50"
               >
-                {saved
-                  ? "Saved!"
-                  : saving
-                    ? "Saving..."
-                    : "Save Appearance"}
+                {failed ? "Failed" : saved ? "Saved!" : saving ? "Saving..." : "Save"}
               </button>
+
+              {errorText && (
+                <p className="max-w-full break-words text-xs text-red-400">
+                  {errorText}
+                </p>
+              )}
             </div>
           </div>
         )}
 
         {active === "layout" && (
-          <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-8">
+          <div>
             <LayoutTab
               initialLayout={profile?.layout ?? "centered"}
               initialBlur={profile?.blur ?? 0}
@@ -495,27 +522,6 @@ export default function AppearanceClient({
           <div className="space-y-8">
             <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-6">
               <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/20">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6 text-pink-500"
-                    >
-                      <path d="M12 3v12" />
-                      <path d="m17 8-5-5-5 5" />
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    </svg>
-                  </div>
-                </div>
-
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-white">
                     Profile Assets

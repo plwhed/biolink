@@ -7,7 +7,7 @@ import Sidebar from "@/components/dashboard/sidebar";
 import LinksTab from "@/components/dashboard/appearance/links-tab";
 
 export const metadata = {
-  title: "Links — egirls.lol",
+  title: "Extra Settings — egirls.lol",
 };
 
 export default async function ContentPage() {
@@ -25,8 +25,11 @@ export default async function ContentPage() {
       <Sidebar />
       <main className="flex-1 px-8 py-10 overflow-y-auto">
         <div className="w-full">
-          <h1 className="text-2xl font-bold tracking-tight mb-6">Links</h1>
-          <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-8">
+          <h1 className="text-4xl font-bold tracking-tight mb-1">Content</h1>
+          <p className="mt-1 text-sm text-white/50 mb-6">
+            Additional options for your profile.
+          </p>
+          <div className="grid grid-cols-1 gap-6">
             <LinksTab
               initialLinks={links.map((l) => ({
                 platform: l.platform,

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Montserrat } from "next/font/google";
 
 const montserrat = Montserrat({
@@ -27,13 +28,11 @@ const legacy: Record<string, string> = {
   cyan: "#06b6d4",
 };
 
-const checker: React.CSSProperties = {
-  backgroundImage:
-    "linear-gradient(45deg,#222 25%,transparent 25%),linear-gradient(-45deg,#222 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#222 75%),linear-gradient(-45deg,transparent 75%,#222 75%)",
-  backgroundSize: "8px 8px",
-  backgroundPosition: "0 0,0 4px,4px -4px,-4px 0",
-  backgroundColor: "#0d0d0d",
-};
+const checkerImage =
+  "linear-gradient(45deg,#222 25%,transparent 25%),linear-gradient(-45deg,#222 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#222 75%),linear-gradient(-45deg,transparent 75%,#222 75%)";
+
+const checkerSize = "8px 8px,8px 8px,8px 8px,8px 8px";
+const checkerPosition = "0 0,0 4px,4px -4px,-4px 0";
 
 const clamp = (n: number) => Math.min(Math.max(n, 0), 1);
 
@@ -43,10 +42,12 @@ function resolve(v: string) {
   return "#ffffff";
 }
 
-function swatch(hex: string): React.CSSProperties {
-  return hex === "transparent"
-    ? checker
-    : { backgroundColor: hex };
+function toRgba(hex: string, alpha: number) {
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return "rgba(0,0,0,0)";
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 function hexToHsv(hex: string) {
@@ -81,11 +82,7 @@ function hexToHsv(hex: string) {
 function hsvToHex(h: number, s: number, v: number) {
   const f = (n: number) => {
     const k = (n + h / 60) % 6;
-
-    return (
-      v -
-      v * s * Math.max(Math.min(k, 4 - k, 1), 0)
-    );
+    return v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
   };
 
   const to = (x: number) =>
@@ -111,6 +108,74 @@ function parseHex(v: string) {
   return null;
 }
 
+function useFrameThrottle<T>(fn: (v: T) => void) {
+  const fnRef = useRef(fn);
+  const raf = useRef<number | null>(null);
+  const pending = useRef<{ v: T } | null>(null);
+
+  fnRef.current = fn;
+
+  const flush = useCallback(() => {
+    raf.current = null;
+    if (pending.current) {
+      const { v } = pending.current;
+      pending.current = null;
+      fnRef.current(v);
+    }
+  }, []);
+
+  const push = useCallback(
+    (v: T) => {
+      pending.current = { v };
+      if (raf.current === null) {
+        raf.current = requestAnimationFrame(flush);
+      }
+    },
+    [flush]
+  );
+
+  useEffect(
+    () => () => {
+      if (raf.current !== null) {
+        cancelAnimationFrame(raf.current);
+        raf.current = null;
+      }
+      if (pending.current) {
+        const { v } = pending.current;
+        pending.current = null;
+        fnRef.current(v);
+      }
+    },
+    []
+  );
+
+  return push;
+}
+
+function Swatch({
+  hex,
+  opacity = 100,
+  className,
+}: {
+  hex: string;
+  opacity?: number;
+  className?: string;
+}) {
+  const fill = toRgba(hex, opacity / 100);
+
+  return (
+    <span
+      className={`block ring-1 ring-inset ring-white/10 ${className ?? ""}`}
+      style={{
+        backgroundImage: `linear-gradient(${fill},${fill}),${checkerImage}`,
+        backgroundSize: `100% 100%,${checkerSize}`,
+        backgroundPosition: `0 0,${checkerPosition}`,
+        backgroundColor: "#0d0d0d",
+      }}
+    />
+  );
+}
+
 function Drag({
   onMove,
   className,
@@ -124,9 +189,7 @@ function Drag({
 }) {
   const active = useRef(false);
 
-  const handle = (
-    e: React.PointerEvent<HTMLDivElement>
-  ) => {
+  const handle = (e: React.PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
 
     onMove(
@@ -161,79 +224,86 @@ function Drag({
   );
 }
 
-function Picker({
+function PickerBody({
+  label,
+  description,
   value,
   onChange,
-  closing,
+  opacity,
+  onOpacityChange,
+  onClose,
 }: {
+  label: string;
+  description: string;
   value: string;
   onChange: (stored: string) => void;
-  closing: boolean;
+  opacity?: number;
+  onOpacityChange?: (v: number) => void;
+  onClose: () => void;
 }) {
   const initial = resolve(value);
+  const hasOpacity = opacity !== undefined && !!onOpacityChange;
 
-  const [hsv, setHsv] = useState(() =>
-    hexToHsv(initial)
-  );
+  const [hsv, setHsv] = useState(() => hexToHsv(initial));
+  const [text, setText] = useState(initial === "transparent" ? "" : initial);
+  const [localOpacity, setLocalOpacity] = useState(opacity ?? 100);
+  const [opText, setOpText] = useState(String(opacity ?? 100));
 
-  const [text, setText] = useState(
-    initial === "transparent" ? "" : initial
-  );
+  const emitColor = useFrameThrottle<string>(onChange);
+  const emitOpacity = useFrameThrottle<number>((v) => onOpacityChange?.(v));
 
-  const [clear, setClear] = useState(
-    initial === "transparent"
-  );
+  const hex = hsvToHex(hsv.h, hsv.s, hsv.v);
 
-  const hex = hsvToHex(
-    hsv.h,
-    hsv.s,
-    hsv.v
-  );
-
-  const apply = (n: {
-    h: number;
-    s: number;
-    v: number;
-  }) => {
-    const h = hsvToHex(
-      n.h,
-      n.s,
-      n.v
-    );
-
+  const apply = (n: { h: number; s: number; v: number }) => {
+    const h = hsvToHex(n.h, n.s, n.v);
     setHsv(n);
     setText(h);
-    setClear(false);
-    onChange(h);
+    emitColor(h);
+  };
+
+  const applyOpacity = (n: number) => {
+    const v = Math.round(Math.min(Math.max(n, 0), 100));
+    setLocalOpacity(v);
+    setOpText(String(v));
+    emitOpacity(v);
   };
 
   return (
-    <div
-      className={`picker-pop absolute right-0 top-full z-20 mt-2 w-60 origin-top-right rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-3 shadow-2xl ${
-        closing
-          ? "picker-pop-close"
-          : "picker-pop-open"
-      }`}
-    >
+    <>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-base font-semibold text-white">{label}</h3>
+          <p className="mt-0.5 text-xs text-white/40">{description}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-white/5 hover:text-white"
+        >
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
       <Drag
-        onMove={(x, y) =>
-          apply({
-            h: hsv.h,
-            s: x,
-            v: 1 - y,
-          })
-        }
-        className="relative h-28 w-full cursor-crosshair touch-none overflow-hidden rounded-xl"
+        onMove={(x, y) => apply({ h: hsv.h, s: x, v: 1 - y })}
+        className="relative mt-5 h-52 w-full cursor-crosshair touch-none rounded-xl"
         style={{
           backgroundColor: `hsl(${hsv.h},100%,50%)`,
+          backgroundImage:
+            "linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,rgba(255,255,255,0))",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent" />
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
-
         <div
-          className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.6)]"
+          className="pointer-events-none absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white"
           style={{
             left: `${hsv.s * 100}%`,
             top: `${(1 - hsv.v) * 100}%`,
@@ -242,59 +312,112 @@ function Picker({
         />
       </Drag>
 
-      <Drag
-        onMove={(x) =>
-          apply({
-            h: x * 360,
-            s: hsv.s,
-            v: hsv.v,
-          })
-        }
-        className="relative mt-3 h-2.5 w-full cursor-pointer touch-none rounded-full"
-        style={{
-          background:
-            "linear-gradient(to right,#f00 0%,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,#f00 100%)",
-        }}
-      >
-        <div
-          className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.6)]"
-          style={{
-            left: `${(hsv.h / 360) * 100}%`,
-            backgroundColor: `hsl(${hsv.h},100%,50%)`,
-          }}
-        />
-      </Drag>
+      <div className="mt-5 space-y-4">
+        <div>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/40">
+            Hue
+          </p>
+          <Drag
+            onMove={(x) => apply({ h: x * 360, s: hsv.s, v: hsv.v })}
+            className="relative h-3 w-full cursor-pointer touch-none rounded-full"
+            style={{
+              background:
+                "linear-gradient(to right,#f00 0%,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,#f00 100%)",
+            }}
+          >
+            <div
+              className="pointer-events-none absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white"
+              style={{
+                left: `${(hsv.h / 360) * 100}%`,
+                backgroundColor: `hsl(${hsv.h},100%,50%)`,
+              }}
+            />
+          </Drag>
+        </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        <div
-          className="h-9 w-9 shrink-0 rounded-lg border border-white/10"
-          style={swatch(
-            clear ? "transparent" : hex
-          )}
-        />
+        {hasOpacity && (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-white/40">
+                Opacity
+              </p>
+              <span className="text-xs font-medium text-white/60">{localOpacity}%</span>
+            </div>
+            <Drag
+              onMove={(x) => applyOpacity(x * 100)}
+              className="relative h-3 w-full cursor-pointer touch-none rounded-full"
+              style={{
+                backgroundImage: `linear-gradient(to right,${toRgba(hex, 0)},${toRgba(hex, 1)}),${checkerImage}`,
+                backgroundSize: `100% 100%,${checkerSize}`,
+                backgroundPosition: `0 0,${checkerPosition}`,
+                backgroundColor: "#0d0d0d",
+              }}
+            >
+              <div
+                className="pointer-events-none absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white"
+                style={{
+                  left: `${localOpacity}%`,
+                  backgroundColor: toRgba(hex, Math.max(localOpacity / 100, 0.35)),
+                }}
+              />
+            </Drag>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-5 flex items-center gap-3">
+        <Swatch hex={hex} opacity={localOpacity} className="h-10 w-10 shrink-0 rounded-lg" />
 
         <input
           value={text}
+          autoComplete="off"
           onChange={(e) => {
             setText(e.target.value);
-
-            const n = parseHex(
-              e.target.value
-            );
-
+            const n = parseHex(e.target.value);
             if (n) {
               setHsv(hexToHsv(n));
-              setClear(false);
-              onChange(n);
+              emitColor(n);
             }
           }}
           placeholder="#ffffff"
           spellCheck={false}
           maxLength={7}
-          className="w-full rounded-lg border border-[#1b1b1b] bg-[#080808] px-3 py-2 text-xs font-medium text-white outline-none transition-colors placeholder:text-white/20 hover:border-white/20 focus:border-pink-500/40"
+          className="w-full rounded-lg border border-[#1b1b1b] bg-[#080808] px-3 py-2.5 text-sm font-medium text-white outline-none transition-colors placeholder:text-white/20 hover:border-white/20 focus:border-pink-500/40"
         />
+
+        {hasOpacity && (
+          <div className="relative w-24 shrink-0">
+            <input
+              value={opText}
+              inputMode="numeric"
+              autoComplete="off"
+              onChange={(e) => {
+                const d = e.target.value.replace(/\D/g, "").slice(0, 3);
+                setOpText(d);
+                if (d !== "") {
+                  const n = Math.min(parseInt(d, 10), 100);
+                  setLocalOpacity(n);
+                  emitOpacity(n);
+                }
+              }}
+              onBlur={() => setOpText(String(localOpacity))}
+              className="w-full rounded-lg border border-[#1b1b1b] bg-[#080808] py-2.5 pl-3 pr-7 text-sm font-medium text-white outline-none transition-colors hover:border-white/20 focus:border-pink-500/40"
+            />
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/40">
+              %
+            </span>
+          </div>
+        )}
       </div>
-    </div>
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="mt-5 w-full rounded-lg bg-pink-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pink-400 active:scale-[0.98]"
+      >
+        Done
+      </button>
+    </>
   );
 }
 
@@ -303,58 +426,105 @@ export function ColorPickerField({
   description,
   value,
   onChange,
+  opacity,
+  onOpacityChange,
 }: {
   label: string;
   description: string;
   value: string;
   onChange: (v: string) => void;
+  opacity?: number;
+  onOpacityChange?: (v: number) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const pickerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [shown, setShown] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const openPicker = () => {
+    clearTimeout(timer.current);
+    setMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)));
+  };
+
+  const closePicker = useCallback(() => {
+    setShown(false);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setMounted(false), 250);
+  }, []);
 
   useEffect(() => {
-    if (!open) return;
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
+    if (!mounted) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closePicker();
     };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [open]);
+
+    document.addEventListener("keydown", onKey);
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mounted, closePicker]);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   const hex = resolve(value);
+  const hasOpacity = opacity !== undefined && !!onOpacityChange;
 
   return (
-    <div className="relative flex items-center gap-4 rounded-xl border bg-[#0d0d0d] p-3 transition-all duration-200 border-[#1b1b1b] hover:border-white/20">
+    <div className="flex items-center justify-between gap-4">
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold text-white/40">
-          {label}
-        </p>
-        <p className="mt-0.5 truncate text-xs text-white/50">
-          {description}
-        </p>
-      </div >
-
-      <div
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2.5 rounded-lg border border-[#1b1b1b] bg-[#080808] py-1 pl-1.5 pr-3 transition-all duration-200 hover:border-white/20 cursor-pointer"
-      >
-        <span
-          className="h-6 w-6 rounded-md border border-white/10"
-          style={swatch(hex)}
-        />
-        <span className="text-xs font-medium text-white/70">
-          {hex}
-        </span>
+        <p className="text-base font-semibold text-white">{label}</p>
+        <p className="truncate text-sm text-white/40">{description}</p>
       </div>
 
-      {open && (
-        <div ref={pickerRef} className="absolute right-0 top-full z-20 mt-2">
-          <Picker value={value} onChange={onChange} closing={false} />
-        </div>
-      )}
-    </div >
+      <button
+        type="button"
+        onClick={openPicker}
+        className="flex shrink-0 items-center gap-3 rounded-xl border border-[#1b1b1b] bg-[#080808] py-2 pl-2 pr-4 transition-[border-color,transform] duration-200 hover:border-white/20 active:scale-95"
+      >
+        <Swatch hex={hex} opacity={opacity ?? 100} className="h-8 w-8 rounded-lg" />
+        <span className="text-sm font-medium text-white">{hex}</span>
+        {hasOpacity && (
+          <span className="border-l border-white/10 pl-3 text-sm font-medium text-white/50">
+            {opacity}%
+          </span>
+        )}
+      </button>
+
+      {mounted &&
+        createPortal(
+          <div
+            className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-opacity duration-250 ease-out ${
+              shown ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div
+              onClick={closePicker}
+              className="absolute inset-0 bg-black/80"
+            />
+
+            <div
+              className={`${montserrat.className} relative w-full max-w-sm transform-gpu rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-5 transition-[transform,opacity] duration-250 ease-out will-change-transform ${
+                shown
+                  ? "translate-y-0 scale-100 opacity-100"
+                  : "translate-y-4 scale-95 opacity-0"
+              }`}
+            >
+              <PickerBody
+                label={label}
+                description={description}
+                value={value}
+                onChange={onChange}
+                opacity={opacity}
+                onOpacityChange={onOpacityChange}
+                onClose={closePicker}
+              />
+            </div>
+          </div>,
+          document.body
+        )}
+    </div>
   );
 }
 

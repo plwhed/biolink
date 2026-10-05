@@ -171,8 +171,17 @@ export default function LayoutTab({
     <div className="space-y-8">
       {!hideLayoutControls && (
         <>
-          <div>
-            <p className="mb-3 text-sm font-semibold text-white/60">Profile layout</p>
+          <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-white">Layout Settings</h2>
+                <p className="text-zinc-400">Adjust how your profile is arranged and displayed!</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-6 space-y-4">
+            <p className="text-sm font-semibold text-white/60">Profile layout</p>
             <div className="grid max-w-2xl grid-cols-2 gap-4">
               {layouts.map((l) => (
                 <button
@@ -194,8 +203,8 @@ export default function LayoutTab({
             </div>
           </div>
 
-          <div>
-            <p className="mb-3 text-sm font-semibold text-white/60">3D card effect</p>
+          <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-6 space-y-4">
+            <p className="text-sm font-semibold text-white/60">Card effects</p>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {tiltModes.map((m) => (
                 <button
@@ -219,20 +228,18 @@ export default function LayoutTab({
               ))}
             </div>
           </div>
-        </>
-      )}
 
-      {!hideLayoutControls && (
-        <div className="flex items-center gap-4 border-t border-[#1b1b1b] pt-6">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="rounded-xl bg-pink-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pink-400 disabled:opacity-50"
-          >
-            {saved ? "Saved!" : saving ? "Saving..." : "Save"}
-          </button>
-          {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
-        </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="rounded-xl bg-pink-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pink-400 disabled:opacity-50"
+            >
+              {saved ? "Saved!" : saving ? "Saving..." : "Save"}
+            </button>
+            {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
+          </div>
+        </>
       )}
     </div>
   );

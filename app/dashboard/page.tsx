@@ -75,7 +75,7 @@
             <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
             <p className="mt-2 text-base text-white/50">
               Welcome back,{" "}
-              <span className="text-pink-400 font-medium">{session.username}</span>.
+              <span className="text-pink-400 font-medium">{session.username}</span>
             </p>
 
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

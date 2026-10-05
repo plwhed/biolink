@@ -52,6 +52,7 @@ export async function PUT(req: Request) {
   if (body.tiltEnabled !== undefined) profileData.tiltEnabled = body.tiltEnabled ? 1 : 0;
   if (body.tiltMode !== undefined) profileData.tiltMode = body.tiltMode;
   if (body.borderRadius !== undefined) profileData.borderRadius = body.borderRadius;
+  if (body.borderWidth !== undefined) profileData.borderWidth = body.borderWidth;
   if (body.cardWidth !== undefined) profileData.cardWidth = body.cardWidth;
   if (body.accentColor !== undefined) profileData.accentColor = body.accentColor;
   if (body.badgeColor !== undefined) profileData.badgeColor = body.badgeColor;
