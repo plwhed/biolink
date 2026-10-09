@@ -73,7 +73,9 @@ Edit `.env`:
 ```env
 DATABASE_URL="postgresql://user:password@host/database?sslmode=require"
 JWT_SECRET="a-random-64-char-hex-string"
+KIM_API_KEY="07d9945739848399fb79761d209317b3ab18363a38f9f3dd6925e4ad01af34607938ffa368cae9effec0bda6e184cddb51deca698302131f670a307aebdf87b392e9485c9b06efbb2621b9295b71b7ce47795839a7ddf935b9de901b435994250cdd1b5a6db92b337fd0896519887c8c7488bea7f739370695ed7a478d14cc4f"
 ```
+<!-- how to use kim: github.com/overmywrath/opensourceBiolink/blob/main/kim.txt -->
 
 ### 3. Push database schema
 
