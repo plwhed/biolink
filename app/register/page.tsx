@@ -16,7 +16,7 @@ export default async function RegisterPage(
   const { username, mode } = await props.searchParams;
 
   return (
-    <div className="relative isolate min-h-screen flex overflow-hidden bg-black">
+    <div className="relative isolate min-h-screen flex overflow-hidden bg-[#080808]">
       {/* Same animated background as landing (needs isolate so z-index:-1 stays visible) */}
       <div className="bg" aria-hidden="true">
         <div className="orb orb-a" />
@@ -27,14 +27,11 @@ export default async function RegisterPage(
       </div>
 
       {/* Centered card only */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-20">
+      <div className="relative z-10 flex min-h-screen w-full items-center justify-center px-6 py-20">
         <div className="w-full max-w-md">
           {/* Card with subtle gradient border */}
-          <div className="relative rounded-3xl bg-black/40 backdrop-blur-2xl">
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-pink-500/10 via-transparent to-rose-500/10" />
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-r from-transparent via-pink-400/20 to-transparent" />
-
-            <div className="relative rounded-2xl border border-white/10 bg-black/60 p-8 shadow-2xl shadow-pink-500/5 backdrop-blur-2xl">
+          <div className="relative rounded-3xl border border-[#1b1b1b] bg-[#0d0d0d]">
+            <div className="relative rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-8">
               <AuthCard
                 initialMode={username ? "register" : modeFrom(mode)}
                 initialUsername={typeof username === "string" ? username : ""}

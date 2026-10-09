@@ -1,6 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSave } from "@fortawesome/free-solid-svg-icons";
+import { useToastStack } from "@/components/ui/toast-stack";
+import { useDashboardDirtyState } from "@/components/dashboard/dashboard-dirty-state";
 
 interface InfoTabProps {
   initialDisplayName: string;
@@ -11,6 +15,11 @@ interface InfoTabProps {
   initialBackground: string | null;
   initialCursor: string | null;
 }
+
+const inputClass =
+  "w-full rounded-xl border border-[#1b1b1b] bg-[#080808] px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 hover:border-white/20 focus:border-white/20";
+
+const labelClass = "mb-2 block text-sm font-semibold text-white/60";
 
 function UploadBox({
   label,
@@ -61,42 +70,38 @@ function UploadBox({
   }
 
   return (
-    <div className="relative">
+    <div className="group relative">
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="group flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-3 transition hover:border-pink-400/30 hover:bg-white/[0.07]"
+        disabled={uploading}
+        className="flex w-full items-center gap-4 rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-5 text-left transition-all duration-300 ease-out hover:border-white/20 hover:bg-[#0f0f0f] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-pink-500/10 text-pink-500 transition-transform duration-300 group-hover:scale-110">
           {preview ? (
             <img src={preview} alt={label} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-white/20">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-              </svg>
-            </div>
-          )}
-          {preview && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition group-hover:opacity-100">
-              <span className="text-[10px] font-medium text-white">Change</span>
-            </div>
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+            </svg>
           )}
         </div>
-        <div className="text-left">
-          <p className="text-sm font-medium text-white/80">{label}</p>
-          <p className="text-xs text-white/30">
-            {uploading ? "Uploading..." : preview ? "Click to change" : "Click to upload"}
+        <div className="min-w-0 flex flex-col transition-all duration-300">
+          <p className="text-sm font-semibold text-white/60 transition-colors group-hover:text-white/80">{label}</p>
+          <p className="truncate text-base font-bold tracking-tight text-white transition-colors group-hover:text-white">
+            {uploading ? "Uploading..." : preview ? "Change" : "Click to upload"}
           </p>
         </div>
         <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
       </button>
       {preview && (
         <button
+          type="button"
           onClick={handleDelete}
-          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-zinc-800 text-white/40 opacity-0 transition hover:border-red-400/50 hover:bg-red-400/20 hover:text-red-400 group-hover:opacity-100"
+          disabled={uploading}
+          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-[#1b1b1b] bg-[#080808] text-white/40 opacity-0 transition-all duration-200 hover:border-red-400/50 hover:text-red-400 group-hover:opacity-100 disabled:opacity-0 hover:scale-110"
         >
-          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -124,6 +129,42 @@ export default function InfoTab({
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [baseline, setBaseline] = useState({
+    displayName: initialDisplayName,
+    description: initialDescription,
+    overlayText: initialOverlayText,
+    overlayEnabled: initialOverlayEnabled,
+    avatar,
+    background,
+    cursor,
+  });
+  const { pushToast } = useToastStack();
+
+  const dirtyCount = useMemo(() => {
+    const current = {
+      displayName,
+      description,
+      overlayText,
+      overlayEnabled,
+      avatar,
+      background,
+      cursor,
+    };
+
+    return Object.entries(current).filter(
+      ([key, value]) => value !== baseline[key as keyof typeof baseline]
+    ).length;
+  }, [avatar, background, baseline, cursor, description, displayName, overlayEnabled, overlayText]);
+
+  function handleUndo() {
+    setDisplayName(baseline.displayName);
+    setDescription(baseline.description);
+    setOverlayText(baseline.overlayText);
+    setOverlayEnabled(baseline.overlayEnabled);
+    setAvatar(baseline.avatar);
+    setBackground(baseline.background);
+    setCursor(baseline.cursor);
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -144,7 +185,17 @@ export default function InfoTab({
         }),
       });
       if (!response.ok) throw new Error("Could not save your profile settings.");
+      setBaseline({
+        displayName,
+        description,
+        overlayText,
+        overlayEnabled,
+        avatar,
+        background,
+        cursor,
+      });
       setSaved(true);
+      pushToast("Profile Saved!");
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Could not save your profile settings.");
@@ -153,81 +204,81 @@ export default function InfoTab({
     }
   }
 
+  useDashboardDirtyState("profile", {
+    count: dirtyCount,
+    onSave: handleSave,
+    onUndo: handleUndo,
+  });
+
   return (
-    <div className="space-y-6">
-      {/* Display Name */}
-      <div>
-        <label className="block text-sm font-medium text-white/70 mb-2">Display Name</label>
-        <input
-          type="text"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          placeholder="Your display name"
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15"
-        />
-        <p className="mt-1 text-xs text-white/30">Shown instead of your username on your profile</p>
+    <div className="space-y-8">
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <UploadBox label="Avatar" current={avatar || null} type="avatar" onUpload={setAvatar} onDelete={() => setAvatar("")} />
+        <UploadBox label="Background" current={background || null} type="background" onUpload={setBackground} onDelete={() => setBackground("")} />
+        <UploadBox label="Cursor" current={cursor || null} type="cursor" onUpload={setCursor} onDelete={() => setCursor("")} />
       </div>
 
-      {/* Description */}
-      <div>
-        <label className="block text-sm font-medium text-white/70 mb-2">Description</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Tell visitors about yourself..."
-          rows={3}
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15 resize-none"
-        />
-        <p className="mt-1 text-xs text-white/30">Shown below your name on your profile</p>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col">
+          <label className={labelClass}>Display Name</label>
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="Your display name"
+            className={inputClass}
+          />
+          <p className="mt-2 text-xs text-white/30">Shown instead of your username on your profile</p>
+        </div>
+        <div className="flex flex-col">
+          <label className={labelClass}>Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Tell visitors about yourself..."
+            rows={3}
+            className={`${inputClass} resize-none`}
+          />
+          <p className="mt-2 text-xs text-white/30">Shown below your name on your profile</p>
+        </div>
       </div>
 
-      {/* Click-to-show Overlay */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-medium text-white/70">Click-to-show overlay</label>
+      <div className="rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-white/60">Click-to-show overlay</p>
+            <p className="mt-0.5 text-sm text-white/50">Show a screen before your profile opens</p>
+          </div>
           <button
+            type="button"
+            role="switch"
+            aria-checked={overlayEnabled}
             onClick={() => setOverlayEnabled(!overlayEnabled)}
-            className={`relative h-6 w-11 rounded-full transition ${
-              overlayEnabled ? "bg-pink-400" : "bg-white/10"
+            className={`relative h-7 w-12 shrink-0 rounded-full border transition-colors ${
+              overlayEnabled ? "border-pink-500/40 bg-pink-500/20" : "border-[#1b1b1b] bg-[#080808]"
             }`}
           >
             <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                overlayEnabled ? "translate-x-[22px]" : "translate-x-0.5"
+              className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all ${
+                overlayEnabled ? "left-6 bg-pink-400" : "left-1 bg-white/40"
               }`}
             />
           </button>
         </div>
         {overlayEnabled && (
-          <div className="space-y-2">
+          <div className="mt-5 border-t border-[#1b1b1b] pt-5">
             <input
               type="text"
               value={overlayText}
               onChange={(e) => setOverlayText(e.target.value)}
               placeholder="Click to show"
-              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-pink-400 focus:ring-4 focus:ring-pink-400/15"
+              className={inputClass}
             />
           </div>
         )}
       </div>
 
-      {/* Media Uploads */}
-      <div>
-        <p className="mb-3 text-sm font-medium text-white/70">Profile Media</p>
-        <div className="grid grid-cols-3 gap-3">
-          <UploadBox label="Avatar" current={avatar || null} type="avatar" onUpload={setAvatar} onDelete={() => setAvatar("")} />
-          <UploadBox label="Background" current={background || null} type="background" onUpload={setBackground} onDelete={() => setBackground("")} />
-          <UploadBox label="Cursor" current={cursor || null} type="cursor" onUpload={setCursor} onDelete={() => setCursor("")} />
-        </div>
-      </div>
-
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="rounded-full bg-pink-400 px-5 py-2 text-sm font-semibold text-pink-950 transition hover:bg-pink-300 disabled:opacity-50"
-      >
-        {saved ? "Saved!" : saving ? "Saving..." : "Save"}
-      </button>
       {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
     </div>
   );

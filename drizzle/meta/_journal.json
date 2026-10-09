@@ -29,6 +29,55 @@
       "when": 1787864046720,
       "tag": "0003_superb_luke_cage",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791176384070,
+      "tag": "0004_high_titanium_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1760000000000,
+      "tag": "0005_social_link_icon_url",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791176384071,
+      "tag": "0006_premium_subscriptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791176384072,
+      "tag": "0007_users_premium",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791176384073,
+      "tag": "0008_default_badges",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791176384074,
+      "tag": "0009_profile_feedback",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791176384075,
+      "tag": "0010_profile_widgets",
+      "breakpoints": true
     }
   ]
 }

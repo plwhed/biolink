@@ -11,9 +11,11 @@ const secret = new TextEncoder().encode(
 export async function getSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
+
   if (!token) return null;
 
   let payload: JWTPayload;
+
   try {
     ({ payload } = await jwtVerify(token, secret));
   } catch {
@@ -22,15 +24,24 @@ export async function getSession() {
 
   if (typeof payload.sub !== "string") return null;
 
+  const userId = Number(payload.sub);
+
+  if (!Number.isInteger(userId) || userId < 1) return null;
+
   const [user] = await db
-    .select({ id: users.id, username: users.username })
+    .select({
+      id: users.id,
+      username: users.username,
+      isAdmin: users.isAdmin,
+    })
     .from(users)
-    .where(eq(users.id, payload.sub));
+    .where(eq(users.id, userId));
 
   if (!user) return null;
 
   return {
     id: user.id,
     username: user.username,
+    isAdmin: !!user.isAdmin,
   };
 }

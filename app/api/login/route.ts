@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { compare } from "bcryptjs";
 import { SignJWT } from "jose";
-import { db } from "@/lib/db";
+import { db, ensureUsersSchema } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 
@@ -19,6 +19,8 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    await ensureUsersSchema();
 
     const [user] = await db
       .select()

@@ -2,7 +2,8 @@
 
 /*
  * Magnet — React Bits (DavidHDev/react-bits, MIT + Commons Clause).
- * Vendored verbatim (only the 'use client' directive removed; Vite SPA).
+ * Vendored (only the 'use client' directive removed and the disabled-reset
+ * moved to a render-time adjustment; Vite SPA).
  */
 import { useState, useEffect, useRef } from 'react';
 
@@ -21,11 +22,16 @@ const Magnet = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const magnetRef = useRef(null);
 
+  // Reset the offset during render when `disabled` flips on, instead of
+  // setting state synchronously inside the effect.
+  const [prevDisabled, setPrevDisabled] = useState(disabled);
+  if (prevDisabled !== disabled) {
+    setPrevDisabled(disabled);
+    if (disabled) setPosition({ x: 0, y: 0 });
+  }
+
   useEffect(() => {
-    if (disabled) {
-      setPosition({ x: 0, y: 0 });
-      return;
-    }
+    if (disabled) return;
 
     const handleMouseMove = e => {
       if (!magnetRef.current) return;

@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
+import { useToastStack } from "@/components/ui/toast-stack";
 
 type Mode = "login" | "register";
 
@@ -41,33 +42,45 @@ export default function AuthCard({
 
     if (mode === "register") {
       if (!username.trim() || !email.trim() || !password) {
-        setError("Please fill in every field.");
+        const msg = "Please fill in every field.";
+        setError(msg);
+        pushToast(msg);
         setLoading(false);
         return;
       }
       if (!/^\S+@\S+\.\S+$/.test(email)) {
-        setError("That email doesn't look right.");
+        const msg = "That email doesn't look right.";
+        setError(msg);
+        pushToast(msg);
         setLoading(false);
         return;
       }
       if (password.length < 8) {
-        setError("Password must be at least 8 characters.");
+        const msg = "Password must be at least 8 characters.";
+        setError(msg);
+        pushToast(msg);
         setLoading(false);
         return;
       }
       if (password !== confirm) {
-        setError("Passwords don't match.");
+        const msg = "Passwords don't match.";
+        setError(msg);
+        pushToast(msg);
         setLoading(false);
         return;
       }
       if (!tos) {
-        setError("Please accept the Terms of Service.");
+        const msg = "Please accept the Terms of Service.";
+        setError(msg);
+        pushToast(msg);
         setLoading(false);
         return;
       }
     } else {
       if (!username.trim() || !password) {
-        setError("Please enter your username and password.");
+        const msg = "Please enter your username and password.";
+        setError(msg);
+        pushToast(msg);
         setLoading(false);
         return;
       }
@@ -89,19 +102,28 @@ export default function AuthCard({
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Something went wrong.");
+        const msg = data.error || "Something went wrong.";
+        setError(msg);
+        pushToast(msg);
         setLoading(false);
         return;
       }
 
+      pushToast(mode === "register" ? "Account created!" : "Logged in successfully!");
+      // Full page reload after auth so all client state starts fresh.
+      // eslint-disable-next-line react-hooks/immutability, @next/next/no-location-assign-relative-destination
       window.location.href = "/dashboard";
     } catch {
-      setError("Something went wrong. Please try again.");
+      const msg = "Something went wrong. Please try again.";
+      setError(msg);
+      pushToast(msg);
       setLoading(false);
     }
   }
 
   const isRegister = mode === "register";
+
+  const { pushToast } = useToastStack();
 
   const inputBase = "w-full rounded-xl border bg-black/40 px-4 py-3 text-base text-white outline-none transition placeholder:text-white/30 disabled:opacity-50 disabled:cursor-not-allowed";
   const labelBase = "mb-2 block text-sm font-medium text-white/80";
@@ -118,7 +140,7 @@ export default function AuthCard({
             onClick={() => switchMode("login")}
             className={`relative z-10 flex-1 rounded-full py-2.5 text-sm font-medium transition-colors ${
               mode === "login"
-                ? "bg-pink-400 text-pink-950 shadow-sm"
+                ? "bg-pink-400 text-pink-950"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -131,7 +153,7 @@ export default function AuthCard({
             onClick={() => switchMode("register")}
             className={`relative z-10 flex-1 rounded-full py-2.5 text-sm font-medium transition-colors ${
               isRegister
-                ? "bg-pink-400 text-pink-950 shadow-sm"
+                ? "bg-pink-400 text-pink-950"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -280,7 +302,7 @@ export default function AuthCard({
             type="submit"
             disabled={loading}
             whileTap={{ scale: 0.98 }}
-            className="w-full rounded-full bg-pink-400 py-3.5 text-base font-semibold text-pink-950 shadow-lg shadow-pink-500/25 transition hover:bg-pink-300 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-full bg-pink-400 py-3.5 text-base font-semibold text-pink-950 transition hover:bg-pink-300 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
               ? "Please wait…"
