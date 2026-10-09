@@ -968,6 +968,17 @@ a:focus-visible, button:focus-visible {
   padding: 12px 4px;
 }
 .claim input::placeholder { color: rgba(255, 255, 255, 0.48); }
+/* Kill Chrome's yellow autofill paint — keep the transparent pill look */
+.claim input:-webkit-autofill,
+.claim input:-webkit-autofill:hover,
+.claim input:-webkit-autofill:focus,
+.claim input:-webkit-autofill:active {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0) inset;
+  box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0) inset;
+  caret-color: #fff;
+  transition: background-color 9999s ease-in-out 0s;
+}
 .claim .btn { flex: none; padding: 13px 26px; font-size: 15px; }
 
 @media (max-width: 760px) {

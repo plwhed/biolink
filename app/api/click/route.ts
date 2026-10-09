@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get("id");
+  const id = (url.searchParams.get("id") ?? "").trim();
 
   if (!id) {
     return NextResponse.redirect(new URL("/", url.origin));

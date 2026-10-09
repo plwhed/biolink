@@ -25,11 +25,14 @@ export default function ParallaxCard({
     const el = cardRef.current;
     if (!el) return;
 
-    function updateTransform() {
-      el.style.setProperty("--tilt-x", `${tiltRef.current.x}`);
-      el.style.setProperty("--tilt-y", `${tiltRef.current.y}`);
+    // Capture a non-null reference so nested handlers can use it safely.
+    const card: HTMLDivElement = el;
 
-      const inner = el.querySelector(".parallax-inner");
+    function updateTransform() {
+      card.style.setProperty("--tilt-x", `${tiltRef.current.x}`);
+      card.style.setProperty("--tilt-y", `${tiltRef.current.y}`);
+
+      const inner = card.querySelector<HTMLElement>(".parallax-inner");
       if (inner) {
         inner.style.transform = `
           perspective(${perspective}px)
@@ -42,7 +45,7 @@ export default function ParallaxCard({
     }
 
     function handleMouseMove(e: MouseEvent) {
-      const rect = el.getBoundingClientRect();
+      const rect = card.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
 

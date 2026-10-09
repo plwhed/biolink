@@ -10,9 +10,12 @@ export async function POST(req: Request) {
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
-  const type = formData.get("type") as string;
+  const rawType = String(formData.get("type") ?? "").trim().toLowerCase();
+  const normalizedType = ["icon", "custom"].includes(rawType)
+    ? "avatar"
+    : rawType;
 
-  if (!file || !["avatar", "background", "cursor"].includes(type)) {
+  if (!file || !["avatar", "background", "cursor"].includes(normalizedType)) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
@@ -23,8 +26,8 @@ export async function POST(req: Request) {
         "x-kim-api-key": KIM_API_KEY || "",
         "x-kim-mode": "moe",
         "x-kim-visibility": "public",
-        "x-filename": file.name,
-        "Content-Type": file.type,
+        "x-filename": file.name || "upload",
+        "Content-Type": file.type || "application/octet-stream",
       },
       body: file,
     });

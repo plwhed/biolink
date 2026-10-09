@@ -1,6 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSave } from "@fortawesome/free-solid-svg-icons";
+import { useToastStack } from "@/components/ui/toast-stack";
+import { useDashboardDirtyState } from "@/components/dashboard/dashboard-dirty-state";
 
 interface InfoTabProps {
   initialDisplayName: string;
@@ -125,6 +129,42 @@ export default function InfoTab({
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [baseline, setBaseline] = useState({
+    displayName: initialDisplayName,
+    description: initialDescription,
+    overlayText: initialOverlayText,
+    overlayEnabled: initialOverlayEnabled,
+    avatar,
+    background,
+    cursor,
+  });
+  const { pushToast } = useToastStack();
+
+  const dirtyCount = useMemo(() => {
+    const current = {
+      displayName,
+      description,
+      overlayText,
+      overlayEnabled,
+      avatar,
+      background,
+      cursor,
+    };
+
+    return Object.entries(current).filter(
+      ([key, value]) => value !== baseline[key as keyof typeof baseline]
+    ).length;
+  }, [avatar, background, baseline, cursor, description, displayName, overlayEnabled, overlayText]);
+
+  function handleUndo() {
+    setDisplayName(baseline.displayName);
+    setDescription(baseline.description);
+    setOverlayText(baseline.overlayText);
+    setOverlayEnabled(baseline.overlayEnabled);
+    setAvatar(baseline.avatar);
+    setBackground(baseline.background);
+    setCursor(baseline.cursor);
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -145,7 +185,17 @@ export default function InfoTab({
         }),
       });
       if (!response.ok) throw new Error("Could not save your profile settings.");
+      setBaseline({
+        displayName,
+        description,
+        overlayText,
+        overlayEnabled,
+        avatar,
+        background,
+        cursor,
+      });
       setSaved(true);
+      pushToast("Profile Saved!");
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Could not save your profile settings.");
@@ -154,8 +204,15 @@ export default function InfoTab({
     }
   }
 
+  useDashboardDirtyState("profile", {
+    count: dirtyCount,
+    onSave: handleSave,
+    onUndo: handleUndo,
+  });
+
   return (
     <div className="space-y-8">
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <UploadBox label="Avatar" current={avatar || null} type="avatar" onUpload={setAvatar} onDelete={() => setAvatar("")} />
         <UploadBox label="Background" current={background || null} type="background" onUpload={setBackground} onDelete={() => setBackground("")} />
@@ -222,16 +279,7 @@ export default function InfoTab({
         )}
       </div>
 
-      <div className="flex items-center gap-4 border-t border-[#1b1b1b] pt-6">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="rounded-xl bg-pink-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pink-400 disabled:opacity-50"
-        >
-          {saved ? "Saved!" : saving ? "Saving..." : "Save"}
-        </button>
-        {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
-      </div>
+      {saveError && <p role="alert" className="text-sm text-red-400">{saveError}</p>}
     </div>
   );
 }

@@ -78,16 +78,51 @@ const brandIcons: Record<string, typeof faDiscord> = {
   "fa-reddit": faReddit,
 };
 
+export const SOLID_BADGE_ICONS = Object.keys(solidIcons);
+
+export const BRAND_BADGE_ICONS = Object.keys(brandIcons);
+
+/** FontAwesome definition for a badge, or null when it has none. */
+export function resolveBadgeIcon(prefix: string, name: string) {
+  const key = name.trim();
+  if (!key) return null;
+  if (prefix === "brand") return brandIcons[key] ?? null;
+  return solidIcons[key] ?? null;
+}
+
 export default function BadgeIcon({
   prefix,
   name,
+  url,
   style,
 }: {
   prefix: string;
   name: string;
+  url?: string;
   style?: React.CSSProperties;
 }) {
-  const icon = prefix === "brand" ? brandIcons[name] : solidIcons[name];
-  if (!icon) return null;
-  return <FontAwesomeIcon icon={icon} className="h-2 w-2" style={style as any} />;
+  // FontAwesome wins over uploaded images — images are only a fallback
+  // for badges without a known icon.
+  const icon = resolveBadgeIcon(prefix, name ?? "");
+
+  if (icon) {
+    return <FontAwesomeIcon icon={icon} className="h-2 w-2" style={style as React.CSSProperties} />;
+  }
+
+  if (url) {
+    // Image badges use a squircle shape (square with slightly rounded
+    // corners) instead of a full circle.
+    const { borderRadius = "30%", ...rest } = style ?? {};
+
+    return (
+      <img
+        src={url}
+        alt={name}
+        className="h-2 w-2 object-cover"
+        style={{ ...rest, borderRadius } as React.CSSProperties}
+      />
+    );
+  }
+
+  return null;
 }

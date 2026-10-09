@@ -42,6 +42,32 @@ samp {
   color: #3b0a1e;
 }
 
+/* Scroll everywhere, but never show a scrollbar. */
+* {
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Layout editor context menu: pops in small → big. */
+@keyframes menu-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.menu-pop {
+  animation: menu-pop 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top left;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
@@ -125,5 +151,155 @@ input:focus-visible {
   .glass-strong {
     background: #0f0f13;
     border: 1px solid #1a1a1e;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Profile tooltip (same look as the UID tooltip)                      */
+/* ------------------------------------------------------------------ */
+
+.ptip {
+  position: relative;
+  /* shrink-wrap the trigger so the bubble sits directly above the
+     content instead of centering over a full-width box */
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+.ptip-bubble {
+  position: absolute;
+  left: 50%;
+  z-index: 60;
+  pointer-events: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background-color: rgba(9, 9, 15, 0.82);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  padding: 5px 11px;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #ffffff;
+  text-align: center;
+  opacity: 0;
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  transition:
+    opacity 0.16s ease,
+    transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1.35);
+  will-change: transform, opacity;
+}
+
+.ptip-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ptip-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.18);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+}
+
+/* little arrow under/over the pill */
+.ptip-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: inherit;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* placement: above the trigger (default) */
+.ptip-top .ptip-bubble {
+  bottom: calc(100% + 9px);
+  transform: translate(-50%, 8px) scale(0.6);
+  transform-origin: bottom center;
+}
+
+.ptip-top .ptip-bubble::after {
+  top: 100%;
+  margin-top: -5px;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+  border-color: inherit;
+}
+
+.ptip-top:hover .ptip-bubble,
+.ptip-top:focus-visible .ptip-bubble,
+.ptip-top:focus-within .ptip-bubble {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+/* placement: below the trigger */
+.ptip-bottom .ptip-bubble {
+  top: calc(100% + 9px);
+  transform: translate(-50%, -8px) scale(0.6);
+  transform-origin: top center;
+}
+
+.ptip-bottom .ptip-bubble::after {
+  bottom: 100%;
+  margin-bottom: -5px;
+  border-left: 1px solid;
+  border-top: 1px solid;
+  border-color: inherit;
+}
+
+.ptip-bottom:hover .ptip-bubble,
+.ptip-bottom:focus-visible .ptip-bubble,
+.ptip-bottom:focus-within .ptip-bubble {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ptip-bubble {
+    transition-duration: 1ms;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Toast stack keyframes                                               */
+/* ------------------------------------------------------------------ */
+
+@keyframes toast-stack-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes toast-stack-out {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.9);
   }
 }

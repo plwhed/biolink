@@ -65,7 +65,13 @@ export default function CardSettings({
   initialCardWidth: number;
   initialCardOpacity: number;
   initialBorderOpacity: number;
-  onChange: (settings: any) => void;
+  onChange: (settings: {
+    blur?: number;
+    borderRadius?: number;
+    cardWidth?: number;
+    cardOpacity?: number;
+    borderOpacity?: number;
+  }) => void;
 }) {
   // This component is now deprecated in favor of using Range directly in AppearanceClient
   return null;

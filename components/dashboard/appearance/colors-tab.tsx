@@ -113,7 +113,10 @@ function useFrameThrottle<T>(fn: (v: T) => void) {
   const raf = useRef<number | null>(null);
   const pending = useRef<{ v: T } | null>(null);
 
-  fnRef.current = fn;
+  // Keep the ref pointed at the latest callback outside of render.
+  useEffect(() => {
+    fnRef.current = fn;
+  });
 
   const flush = useCallback(() => {
     raf.current = null;
@@ -253,6 +256,7 @@ function PickerBody({
   const emitOpacity = useFrameThrottle<number>((v) => onOpacityChange?.(v));
 
   const hex = hsvToHex(hsv.h, hsv.s, hsv.v);
+  const isTransparent = value === "transparent";
 
   const apply = (n: { h: number; s: number; v: number }) => {
     const h = hsvToHex(n.h, n.s, n.v);
@@ -412,8 +416,39 @@ function PickerBody({
 
       <button
         type="button"
+        aria-pressed={isTransparent}
+        onClick={() => {
+          if (isTransparent) {
+            setText(hex);
+            emitColor(hex);
+          } else {
+            setText("");
+            emitColor("transparent");
+          }
+        }}
+        className={`mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border py-2.5 text-sm font-semibold transition-all active:scale-[0.98] ${
+          isTransparent
+            ? "border-pink-500/50 bg-pink-500/15 text-pink-300"
+            : "border-[#1b1b1b] bg-[#080808] text-white/60 hover:border-white/20 hover:text-white"
+        }`}
+      >
+        <span
+          aria-hidden="true"
+          className="block h-4 w-4 rounded ring-1 ring-inset ring-white/20"
+          style={{
+            backgroundImage: checkerImage,
+            backgroundSize: checkerSize,
+            backgroundPosition: checkerPosition,
+            backgroundColor: "#0d0d0d",
+          }}
+        />
+        {isTransparent ? "Transparent ✓" : "Set transparent"}
+      </button>
+
+      <button
+        type="button"
         onClick={onClose}
-        className="mt-5 w-full rounded-lg bg-pink-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pink-400 active:scale-[0.98]"
+        className="mt-3 w-full rounded-lg bg-pink-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pink-400 active:scale-[0.98]"
       >
         Done
       </button>

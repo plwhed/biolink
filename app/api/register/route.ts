@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
-import { db } from "@/lib/db";
+import { db, ensureUsersSchema } from "@/lib/db";
 import { profiles, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 
@@ -28,6 +28,8 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    await ensureUsersSchema();
 
     const [existing] = await db
       .select({ id: users.id })

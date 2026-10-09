@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { db, ensureSocialLinksSchema, ensureUsersSchema } from "@/lib/db";
 import { socialLinks } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import Sidebar from "@/components/dashboard/sidebar";
@@ -13,6 +13,9 @@ export const metadata = {
 export default async function ContentPage() {
   const session = await getSession();
   if (!session) redirect("/register");
+
+  await ensureSocialLinksSchema();
+  await ensureUsersSchema();
 
   const links = await db
     .select()

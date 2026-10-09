@@ -27,14 +27,11 @@ export default async function RegisterPage(
       </div>
 
       {/* Centered card only */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-20">
+      <div className="relative z-10 flex min-h-screen w-full items-center justify-center px-6 py-20">
         <div className="w-full max-w-md">
           {/* Card with subtle gradient border */}
-          <div className="relative rounded-3xl bg-[#0d0d0d] border border-[#1b1b1b]">
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-pink-500/10 via-transparent to-rose-500/10" />
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-r from-transparent via-pink-400/20 to-transparent" />
-
-            <div className="relative rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-8 shadow-2xl shadow-pink-500/5">
+          <div className="relative rounded-3xl border border-[#1b1b1b] bg-[#0d0d0d]">
+            <div className="relative rounded-2xl border border-[#1b1b1b] bg-[#0d0d0d] p-8">
               <AuthCard
                 initialMode={username ? "register" : modeFrom(mode)}
                 initialUsername={typeof username === "string" ? username : ""}

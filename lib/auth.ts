@@ -32,6 +32,7 @@ export async function getSession() {
     .select({
       id: users.id,
       username: users.username,
+      isAdmin: users.isAdmin,
     })
     .from(users)
     .where(eq(users.id, userId));
@@ -41,5 +42,6 @@ export async function getSession() {
   return {
     id: user.id,
     username: user.username,
+    isAdmin: !!user.isAdmin,
   };
 }

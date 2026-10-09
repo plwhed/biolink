@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ToastStack } from "@/components/ui/toast-stack";
 import "./globals.css";
 import "./landing.css";
 import "../components/landing-page/bits/bits.css";
@@ -34,7 +35,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             rel="stylesheet"
           />
       </head>
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <ToastStack />
+        {children}
+      </body>
     </html>
   );
 }

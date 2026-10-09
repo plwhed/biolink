@@ -134,7 +134,7 @@ middleware.ts                     # Auth guard for /dashboard/*
 | Table | Purpose |
 |---|---|
 | `users` | User accounts (id, username, email, password_hash, created_at) |
-| `profiles` | Profile settings (avatar, background, cursor, layout, blur, overlay) |
+| `profiles` | Profile settings (avatar, background, cursor, layout, blur, overlay, bio, views/badges placement, custom layout) |
 | `social_links` | Platform social links (Instagram, Discord, etc.) with order |
 | `links` | Custom link buttons with click tracking |
 | `badges` | Badge definitions (name, Font Awesome icon, color) |
@@ -153,6 +153,36 @@ middleware.ts                     # Auth guard for /dashboard/*
 | `POST` | `/api/upload` | Yes | Upload image file |
 | `DELETE` | `/api/upload` | Yes | Delete uploaded file |
 | `GET` | `/api/click?id=` | No | Track click + redirect |
+| `GET` | `/api/status` | No | Public site status + totals |
+| `OPTIONS` | `/api/status` | No | CORS preflight |
+
+### `GET /api/status`
+
+Public, CORS-enabled status endpoint (no auth). Response:
+
+```json
+{
+  "status": "ok",
+  "cause": null,
+  "issues": [],
+  "components": {
+    "database": "operational",
+    "auth": "operational",
+    "uploads": "operational",
+    "api": "operational"
+  },
+  "totalUsers": 123,
+  "totalViews": 45678,
+  "uptime": 12345.6,
+  "responseTimeMs": 42,
+  "checkedAt": "2026-10-07T12:00:00.000Z"
+}
+```
+
+- `status` — `ok` or `down`
+- `cause` — human-readable reason when `status` is `down`, otherwise `null`
+- `issues` — array of detected problem strings
+- Checks: database, session/JWT secret, uploads directory, `KIM_API_KEY`
 
 ## Managing Badges
 

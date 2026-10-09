@@ -285,6 +285,7 @@ export default function App() {
   const tiltRef = useRef(null)
   const journeyRef = useRef(null)
   const layerRefs = useRef([])
+  const claimInputRef = useRef(null)
 
   useEffect(() => {
     const raf = requestAnimationFrame(() =>
@@ -374,6 +375,20 @@ export default function App() {
     window.location.href = '/register' + (u ? '?username=' + encodeURIComponent(u) : '')
   }
 
+  // Footer "Claim it": reuse a typed name if there is one, otherwise
+  // bring the claim bar back into view and focus it (native #claim
+  // anchors don't travel well inside the scroll-journey).
+  const claimFooter = (e) => {
+    e.preventDefault()
+    const u = name.trim().replace(/^@+/, '')
+    if (u) {
+      window.location.href = '/register?username=' + encodeURIComponent(u)
+      return
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.setTimeout(() => claimInputRef.current?.focus({ preventScroll: true }), 650)
+  }
+
   const onTilt = (e) => {
     const el = tiltRef.current
     if (!el) return
@@ -437,7 +452,9 @@ export default function App() {
             <form id="claim" className="claim reveal-cta" onSubmit={claim}>
               <span className="claim-prefix">egirls.lol/</span>
               <input
+                ref={claimInputRef}
                 value={name}
+                name="egirls-claim-username"
                 onChange={(e) => setName(e.target.value)}
                 placeholder="yourname"
                 maxLength={24}
@@ -558,6 +575,7 @@ export default function App() {
                   <StarBorder
                     as="a"
                     href="#claim"
+                    onClick={claimFooter}
                     color="#F472B6"
                     backgroundColor="#0C0E0B"
                     textColor="#FAFAF9"

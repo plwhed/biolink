@@ -1,11 +1,12 @@
   import { redirect } from "next/navigation";
   import { getSession } from "@/lib/auth";
-  import { db } from "@/lib/db";
-  import { pageViews } from "@/lib/schema";
+  import { db, ensureProfileSchema, ensureUsersSchema } from "@/lib/db";
+  import { pageViews, profiles } from "@/lib/schema";
   import { eq, sql, and, gte } from "drizzle-orm";
   import Sidebar from "@/components/dashboard/sidebar";
   import StatCard from "@/components/dashboard/stat-card";
   import ViewsChart from "@/components/dashboard/views-chart";
+  import BioEditor from "@/components/dashboard/bio-editor";
 
   export const metadata = {
     title: "Dashboard — egirls.lol",
@@ -20,10 +21,19 @@
 
     const userId = session.id;
 
+    await ensureUsersSchema();
+
     const [totalViews] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(pageViews)
       .where(eq(pageViews.userId, userId));
+
+    await ensureProfileSchema();
+
+    const [profileRow] = await db
+      .select({ bio: profiles.bio })
+      .from(profiles)
+      .where(eq(profiles.userId, userId));
 
     const rangeDate = new Date();
     rangeDate.setDate(rangeDate.getDate() - MAX_DAYS);
@@ -169,6 +179,8 @@
               </div>
 
               <div className="flex flex-col gap-6">
+                <BioEditor initialBio={profileRow?.bio ?? ""} />
+
                 <div className="rounded-3xl border border-[#1b1b1b] bg-[#0d0d0d] p-6">
                   <div className="flex items-center gap-3 mb-5 text-white">
                     <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0">
