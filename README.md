@@ -4,7 +4,7 @@
 
 [Discord Server](https://discord.gg/kmvA4BqNJm)
 
-**You want to make your own biolink and you don't want it to look like the other ones? Here you go...**
+**You want a biolink but you're a wannabe developer? Here you go....**
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://typescriptlang.org)
@@ -34,6 +34,7 @@ If you want daily updates, polls, sneak peeks etc. just join the discord server 
 | Database | [Neon Postgres](https://neon.tech) (serverless) |
 | ORM | [Drizzle ORM](https://orm.drizzle.team) |
 | Auth | [jose](https://github.com/panva/jose) (JWT) |
+| (file) Uploads | [Documentation](github.com/overmywrath/overmywrath/blob/main/kimdocs.txt) |
 | Passwords | [bcryptjs](https://github.com/nicolo-ribaudo/bcryptjs) |
 | Icons | [Font Awesome](https://fontawesome.com) (React) |
 | Effects | [noise-gradient-bg](https://www.npmjs.com/package/noise-gradient-bg) |
