@@ -2,7 +2,20 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
-const sql = neon(process.env.DATABASE_URL!);
+const connectionString =
+  process.env.DATABASE_URL ?? process.env.POSTGRES_URL ?? "";
+
+// During `next build` ("Collecting page data") Vercel evaluates route
+// modules without runtime env vars. `neon()` throws when the connection
+// string is empty, which fails the whole build. Use a placeholder so
+// module evaluation never throws — real requests will use the actual
+// DATABASE_URL set in the Vercel dashboard. If it's still missing at
+// request time, queries will fail with a clear error.
+const sql = neon(
+  connectionString ||
+    "postgresql://placeholder:placeholder@localhost:5432/placeholder"
+);
+export { sql };
 export const db = drizzle(sql, { schema });
 
 export async function ensureUserBadgeSchema() {

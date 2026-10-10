@@ -19,7 +19,11 @@ import {
 } from '@/components/landing-page/components/ui/bento-demos.jsx'
 import { LiquidGlassAccordion } from '@/components/landing-page/components/ui/liquid-glass-accordion.jsx'
 
-const RM = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+/* Reduced-motion is resolved after mount (state, default false) so the
+   first client render always matches the server HTML. Reading
+   matchMedia during render would SSR as false but hydrate as true
+   whenever the OS has "reduce motion" on — a guaranteed hydration
+   mismatch (React #418) that breaks hydration of the whole landing. */
 
 const HEADLINE = ['One', 'link', 'for', 'your', 'entire', 'universe.']
 const SUBLINE = [
@@ -281,6 +285,7 @@ export default function App() {
   const [loaded, setLoaded] = useState(false)
   const [shotOk, setShotOk] = useState(true)
   const [name, setName] = useState('')
+  const [RM, setRM] = useState(false)
   const pxRef = useRef({ x: 0, y: 0 })
   const tiltRef = useRef(null)
   const journeyRef = useRef(null)
@@ -292,6 +297,14 @@ export default function App() {
       requestAnimationFrame(() => setLoaded(true))
     )
     return () => cancelAnimationFrame(raf)
+  }, [])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setRM(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
   }, [])
 
   /* Mouse parallax — writes into a ref only, zero re-renders. */
