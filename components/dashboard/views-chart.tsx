@@ -5,7 +5,7 @@ interface DayData {
   views: number;
 }
 
-export default function ViewsChart({ data }: { data: DayData[] }) {
+export default function ViewsChart({ data }: { data: DayData[]; range?: number }) {
   const max = Math.max(...data.map((d) => d.views), 1);
 
   return (

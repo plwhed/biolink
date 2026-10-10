@@ -101,6 +101,10 @@ export default function LayoutTab({
   initialBadgesPosition?: string;
   initialShowViews?: boolean;
   initialViewsPosition?: string;
+  initialBorderRadius?: number;
+  initialCardWidth?: number;
+  initialCardOpacity?: number;
+  initialBorderOpacity?: number;
   hideLayoutControls?: boolean;
   /** whether the custom layout (drag editor) is currently enabled */
   customLayoutEnabled?: boolean;
